@@ -42,14 +42,7 @@
                 <p class="mt-1 text-sm text-gray-500">ລະບົບຈັດການຮ້ານອາຫານ ແລະ ສັ່ງອາຫານ</p>
             </div>
             
-            <!-- Account Info Box -->
-            <div class="rounded-xl bg-slate-50 p-4 text-xs text-slate-600 space-y-1 border border-slate-100">
-                <div class="font-bold text-slate-800 mb-1"><i class="fa-solid fa-circle-info mr-1 text-orange-500"></i> ບັນຊີທົດລອງລະບົບ:</div>
-                <div class="flex justify-between"><span>ຜູ້ຈັດການ (Manager):</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200">admin / 1234</span></div>
-                <div class="flex justify-between"><span>ພະນັກງານ (Staff):</span> <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200">staff / 1234</span></div>
-            </div>
-
-            <!-- Form -->
+                       <!-- Form -->
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-600 uppercase">ຊື່ຜູ້ໃຊ້ງານ</label>
@@ -144,6 +137,15 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                         <div id="m-sec-menu" class="lg:col-span-7 space-y-4 block">
+<div class="mb-4">
+    <div class="relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="text" id="search-input" onkeyup="filterMenu()" placeholder="ຄົ້ນຫາຊື່ອາຫານ..." 
+               class="block w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none bg-white">
+    </div>
+</div>
                             <div id="front-category-tabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
                             <div id="front-menu-items" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"></div>
                         </div>
@@ -455,7 +457,20 @@
                 if(savedUser && savedRole) { currentUser = { username: savedUser, role: savedRole }; renderSystemMainView(); }
             };
         }
+// ຟັງຊັນສຳລັບກອງຂໍ້ມູນເມນູ
+function filterMenu() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const menuItems = document.querySelectorAll('.menu-item-card');
 
+    menuItems.forEach(item => {
+        const itemName = item.getAttribute('data-name').toLowerCase();
+        if (itemName.includes(searchTerm)) {
+            item.style.display = ""; // ສະແດງເມນູຖ້າພົບ
+        } else {
+            item.style.display = "none"; // ເຊື່ອງເມນູຖ້າບໍ່ພົບ
+        }
+    });
+}
         function handleLoginSubmit() {
             let u = document.getElementById('login-user').value.trim();
             let p = document.getElementById('login-pass').value.trim();
@@ -551,13 +566,18 @@
         }
 
         function renderMenuLayout() {
-            document.getElementById('front-menu-items').innerHTML = cacheMenu.filter(m => filterCatId === 'all' || m.type == filterCatId).map(m => `
-                <div onclick="addFoodItemToBasket(${m.id})" class="bg-white border border-gray-200 rounded-2xl p-3 text-center shadow-2xs hover:shadow-md cursor-pointer transition-all active:scale-95 group">
-                    <div class="text-xs font-bold text-slate-800 group-hover:text-orange-600 truncate">${m.name}</div>
-                    <div class="text-xs font-black text-orange-500 mt-1">${m.price.toLocaleString()} ₭</div>
-                </div>
-            `).join('');
-        }
+    document.getElementById('front-menu-items').innerHTML = cacheMenu.filter(m => filterCatId === 'all' || m.type == filterCatId).map(m => `
+        <div onclick="addFoodItemToBasket(${m.id})" 
+             class="menu-item-card bg-white border border-gray-200 rounded-2xl p-3 text-center shadow-2xs hover:shadow-md cursor-pointer transition-all active:scale-95 group" 
+             data-name="${m.name}">
+            <div class="text-xs font-bold text-slate-800 group-hover:text-orange-600 truncate">${m.name}</div>
+            <div class="text-xs font-black text-orange-500 mt-1">${m.price.toLocaleString()} ₭</div>
+        </div>
+    `).join('');
+    
+    // ຫຼັງຈາກ Render ແລ້ວ ໃຫ້ເອີ້ນຟັງຊັນ filterMenu ເພື່ອໃຫ້ມັນກວດສອບການຄົ້ນຫາທີ່ຄ້າງໄວ້ (ຖ້າມີ)
+    filterMenu();
+}
 
         function addFoodItemToBasket(id) {
             if(!currentTableName) { showNotice("⚠️ ກະລຸນາຄລິກເລືອກໂຕະກ່ອນ!", "error"); return; }
