@@ -400,6 +400,7 @@
 
     <!-- ================= 5. CORE POS ENGINE (JAVASCRIPT) ================= -->
     <script>
+                let lastSelectedCategoryId = ""; // ຕົວປ່ຽນນີ້ຈະເກັບຄ່າໝວດໝູ່ທີ່ເລືອກໄວ້
         let db; let currentTableName = ""; let activeBasket = [];
         let cacheMenu = []; let cacheTables = []; let cacheCategories = [];
         let filterCatId = "all"; let currentUser = null;
@@ -532,16 +533,39 @@ function filterMenu() {
         }
 
         function renderCategoryLayout() {
-            let actAll = filterCatId === "all" ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-gray-200";
-            let html = `<button onclick="filterByCat('all')" class="px-4 py-2 rounded-xl font-bold text-xs flex-shrink-0 cursor-pointer shadow-2xs ${actAll}"><i class="fa-solid fa-layer-group mr-1"></i> ທັງໝົດ</button>`;
-            cacheCategories.forEach(c => {
-                let act = filterCatId == c.id ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-gray-200";
-                html += `<button onclick="filterByCat('${c.id}')" class="px-4 py-2 rounded-xl font-bold text-xs flex-shrink-0 cursor-pointer shadow-2xs ${act}">${c.name}</button>`;
-            });
-            document.getElementById('front-category-tabs').innerHTML = html;
-            document.getElementById('m-type').innerHTML = cacheCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            document.getElementById('admin-category-list').innerHTML = cacheCategories.map(c => `<div class="flex justify-between items-center py-1.5 text-xs text-slate-700 font-medium"><span>📁 ${c.name}</span><button onclick="deleteRow('categories', ${c.id})" class="text-rose-600 font-bold cursor-pointer">ລົບ</button></div>`).join('');
-        }
+    // 1. ແກ້ໄຂ Layout ໃຫ້ເປັນ Grid (2 ຖັນ)
+    const container = document.getElementById('front-category-tabs');
+    container.className = "grid grid-cols-2 gap-2"; 
+
+    // 2. ສ້າງປຸ່ມໝວດໝູ່ (Button List)
+    let actAll = filterCatId === "all" ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-gray-200";
+    let html = `<button onclick="filterByCat('all')" class="px-4 py-2 rounded-xl font-bold text-xs flex-shrink-0 cursor-pointer shadow-2xs ${actAll}">ທັງໝົດ</button>`;
+    
+    cacheCategories.forEach(c => {
+        let act = filterCatId == c.id ? "bg-slate-900 text-white" : "bg-white text-slate-700 border border-gray-200";
+        html += `<button onclick="filterByCat('${c.id}')" class="px-4 py-2 rounded-xl font-bold text-xs flex-shrink-0 cursor-pointer shadow-2xs ${act}">${c.name}</button>`;
+    });
+    container.innerHTML = html;
+
+    // 3. ອັບເດດ Dropdown (ໃຫ້ຈື່ຄ່າ lastSelectedCategoryId)
+    const mTypeDropdown = document.getElementById('m-type');
+    mTypeDropdown.innerHTML = cacheCategories.map(c => `
+        <option value="${c.id}" ${c.id == lastSelectedCategoryId ? 'selected' : ''}>
+            ${c.name}
+        </option>
+    `).join('');
+
+    // 4. ອັບເດດລາຍການໝວດໝູ່ໃນໜ້າ Admin (ຖ້າມີ)
+    const adminList = document.getElementById('admin-category-list');
+    if (adminList) {
+        adminList.innerHTML = cacheCategories.map(c => `
+            <div class="flex justify-between items-center py-1.5 text-xs text-slate-700 font-medium">
+                <span>📁 ${c.name}</span>
+                <button onclick="deleteRow('categories', ${c.id})" class="text-rose-600 font-bold cursor-pointer">ລົບ</button>
+            </div>
+        `).join('');
+    }
+}
 
         function filterByCat(id) { filterCatId = id; renderMenuLayout(); renderCategoryLayout(); }
 
@@ -768,12 +792,27 @@ function filterMenu() {
             let tx = db.transaction("tables","readwrite"); tx.objectStore("tables").add({name: i.value.trim(), orderList: null});
             tx.oncomplete = function() { i.value=""; fetchRealtimeData(); }
         }
-        function addMenu() {
-            let n = document.getElementById('m-name'); let p = document.getElementById('m-price'); let t = document.getElementById('m-type');
-            if(!n.value.trim() || !p.value) return;
-            let tx = db.transaction("menu","readwrite"); tx.objectStore("menu").add({name: n.value.trim(), price: parseFloat(p.value), type: t.value});
-            tx.oncomplete = function() { n.value=""; p.value=""; fetchRealtimeData(); }
-        }
+       function addMenu() {
+    let name = document.getElementById('m-name').value;
+    let price = parseFloat(document.getElementById('m-price').value); // ປ່ຽນເປັນຕົວເລກ
+    let type = document.getElementById('m-type').value;
+
+    if (!name || isNaN(price) || !type) return alert("ກະລຸນາປ້ອນຂໍ້ມູນໃຫ້ຄົບ");
+
+    // ຈື່ຄ່າໝວດໝູ່ທີ່ເລືອກໄວ້
+    lastSelectedCategoryId = type;
+
+    // ບັນທຶກລົງຖານຂໍ້ມູນ
+    let tx = db.transaction("menu", "readwrite");
+    tx.objectStore("menu").add({ name: name, price: price, type: type });
+    
+    tx.oncomplete = function() {
+        alert("ບັນທຶກເມນູສຳເລັດ");
+        document.getElementById('m-name').value = "";
+        document.getElementById('m-price').value = "";
+        fetchRealtimeData(); // ໂຫຼດຂໍ້ມູນໃໝ່
+    };
+}
         function addNewUserAccount() {
             let u = document.getElementById('u-username'); let p = document.getElementById('u-password'); let r = document.getElementById('u-role');
             if(!u.value.trim() || !p.value) return;
