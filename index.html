@@ -146,7 +146,7 @@
                class="block w-full rounded-xl border border-gray-300 py-2.5 pl-10 pr-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none bg-white">
     </div>
 </div>
-                            <div id="front-category-tabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+                            <div id="front-category-tabs" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
                             <div id="front-menu-items" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3"></div>
                         </div>
 
@@ -786,6 +786,20 @@ function filterMenu() {
                 tx.oncomplete = function() { fetchRealtimeData(); };
             }
         }
+function renderCategories() {
+    const container = document.getElementById('front-category-tabs');
+    
+    // ສ້າງ HTML ຂອງປຸ່ມໝວດໝູ່
+    const allBtn = `<button onclick="filterByCategory('all')" class="py-2 px-3 text-xs font-bold rounded-xl border border-gray-200 bg-white hover:bg-orange-50 active:scale-95 transition-all">ທັງໝົດ</button>`;
+    
+    const catBtns = cacheCategories.map(cat => `
+        <button onclick="filterByCategory(${cat.id})" class="py-2 px-3 text-xs font-bold rounded-xl border border-gray-200 bg-white hover:bg-orange-50 active:scale-95 transition-all">
+            ${cat.name}
+        </button>
+    `).join('');
+
+    container.innerHTML = allBtn + catBtns;
+}
 
         function showNotice(msg, type="success") {
             let box = document.createElement('div');
