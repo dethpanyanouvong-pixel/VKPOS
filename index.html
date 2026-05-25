@@ -203,7 +203,14 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="bg-white rounded-2xl p-4 shadow-xs border border-gray-100 space-y-3">
+    <h4 class="font-bold text-xs text-slate-900 border-b border-gray-100 pb-2 uppercase tracking-wide">
+        <i class="fa-solid fa-print text-orange-500 mr-1.5"></i> ຕັ້ງຄ່າເຄື່ອງພິມ
+    </h4>
+    <button onclick="testPrintReceipt()" class="w-full bg-slate-100 hover:bg-orange-100 text-slate-700 hover:text-orange-600 border border-slate-200 font-bold py-3 rounded-xl text-xs cursor-pointer transition-all">
+        <i class="fa-solid fa-print mr-1.5"></i> ທົດລອງພິມບິນ (Test Print)
+    </button>
+</div>
                             <button onclick="fastProcessPayment()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl shadow-md text-xs cursor-pointer">
                                 <i class="fa-solid fa-receipt mr-1.5"></i> ເເຊັກບິນ ແລະ ອອກໃບບິນ
                             </button>
@@ -689,7 +696,43 @@ function filterMenu() {
                 };
             };
         }
+        function testPrintReceipt() {
+    const modal = document.getElementById('receiptModal');
+    const rItems = document.getElementById('r-items');
+    
+    // 1. Clear ຂໍ້ມູນເກົ່າ
+    rItems.innerHTML = "";
 
+    // 2. ດຶງຂໍ້ມູນຈາກ activeBasket (ຖ້າມີ)
+    if (activeBasket.length > 0) {
+        let total = 0;
+        activeBasket.forEach(item => {
+            let rowTotal = item.price * item.qty;
+            total += rowTotal;
+            rItems.innerHTML += `
+                <tr>
+                    <td class="py-2">${item.name}</td>
+                    <td class="text-center">${item.qty}</td>
+                    <td class="text-right">${item.price.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        document.getElementById('r-total').innerText = total.toLocaleString() + " ₭";
+    } else {
+        // ຖ້າບໍ່ມີລາຍການ, ສະແດງຂໍ້ຄວາມທົດສອບ
+        rItems.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-400">ບໍ່ມີລາຍການອາຫານ (ທົດສອບການພິມ)</td></tr>`;
+        document.getElementById('r-total').innerText = "0 ₭";
+    }
+
+    // 3. ເຕີມຂໍ້ມູນອື່ນໆ
+    document.getElementById('r-meta').innerHTML = `ໂຕະ: ${currentTableName || 'ບໍ່ໄດ້ເລືອກ'} | ວັນທີ: ${new Date().toLocaleDateString('lo-LA')}`;
+    document.getElementById('r-cash').innerText = "0 ₭";
+    document.getElementById('r-transfer').innerText = "0 ₭";
+    document.getElementById('r-change').innerText = "0 ₭";
+
+    // 4. ສະແດງ Modal
+    modal.classList.remove('hidden');
+}
         function openInvoiceModal(data) {
             document.getElementById('r-meta').innerHTML = `ເລກບິນ: BILL-${String(Date.now()).slice(-5)} | ໂຕະ: ${data.tableName}<br>ວັນທີ: ${data.date} | ເວລາ: ${data.time}`;
             document.getElementById('r-items').innerHTML = data.items.map(i => `<tr class="border-b border-gray-100 text-slate-700"><td class="py-2">${i.name}</td><td class="py-2 text-center">${i.qty}</td><td class="py-2 text-right">${(i.price*i.qty).toLocaleString()}</td></tr>`).join('');
