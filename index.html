@@ -417,443 +417,468 @@
             if (!database.objectStoreNames.contains("tables")) database.createObjectStore("tables", { keyPath: "id", autoIncrement: true });
             if (!database.objectStoreNames.contains("sales")) database.createObjectStore("sales", { keyPath: "id", autoIncrement: true });
             if (!database.objectStoreNames.contains("categories")) database.createObjectStore("categories", { keyPath: "id", autoIncrement: true });
-            if (!database.objectStoreNames.contains("users")) database.createObjectStore("users", { keyPath: "username" });
+            if (!database.objectStoreNames.contains("users")) database.createObjectStore("users", { keyPath: "id", autoIncrement: true });
         };
 
         dbRequest.onsuccess = function(e) {
             db = e.target.result;
-            runDatabaseBootstrap();
+            seedDefaultData(() => {
+                loadCategories();
+                loadTables();
+                loadMenuItems();
+                loadUsers();
+                initTodayDate();
+            });
         };
 
-        function runDatabaseBootstrap() {
-            let tx = db.transaction(["menu", "tables", "categories", "users"], "readwrite");
-            
-            // Seed default users if empty
-            let userStore = tx.objectStore("users");
-            userStore.getAll().onsuccess = function(e) {
-                if(e.target.result.length === 0) {
-                    userStore.add({ username: "admin", password: "1234", role: "manager" });
-                    userStore.add({ username: "staff", password: "1234", role: "staff" });
-                }
-            };
+        dbRequest.onerror = function(e) {
+            console.error("IndexedDB Error:", e);
+        };
 
-            // Seed default categories if empty
+        // --- Default Database Seeding ---
+        function seedDefaultData(callback) {
+            let tx = db.transaction(["categories", "tables", "menu", "users"], "readwrite");
             let catStore = tx.objectStore("categories");
-            catStore.getAll().onsuccess = function(e) {
-                if(e.target.result.length === 0) {
-                    catStore.add({ id: 1, name: "🍲 ອາຫານຫຼັກ" });
-                    catStore.add({ id: 2, name: "🥤 ເຄື່ອງດື່ມ" });
+            let tableStore = tx.objectStore("tables");
+            let menuStore = tx.objectStore("menu");
+            let userStore = tx.objectStore("users");
+
+            catStore.count().onsuccess = function(e) {
+                if (e.target.result === 0) {
+                    catStore.add({ name: "ອາຫານຈານດຽວ" });
+                    catStore.add({ name: "ເຄື່ອງດື່ມ" });
+                    catStore.add({ name: "ຂອງຫວານ" });
                 }
             };
 
-            // Seed default tables if empty
-            let tableStore = tx.objectStore("tables");
-            tableStore.getAll().onsuccess = function(e) {
-                if(e.target.result.length === 0) {
-                    for(let i=1; i<=8; i++) {
-                        tableStore.add({ name: "ໂຕະ " + i, orders: [] });
+            tableStore.count().onsuccess = function(e) {
+                if (e.target.result === 0) {
+                    for (let i = 1; i <= 8; i++) {
+                        tableStore.add({ name: `ໂຕະ ${i}`, status: "available", orders: [] });
                     }
+                }
+            };
+
+            menuStore.count().onsuccess = function(e) {
+                if (e.target.result === 0) {
+                    menuStore.add({ name: "ຕຳໝາກຮຸ່ງ", price: 25000, categoryId: 1 });
+                    menuStore.add({ name: "ເຂົ້າຜັດໝູ", price: 35000, categoryId: 1 });
+                    menuStore.add({ name: "ເບຍລາວ (ໃຫຍ່)", price: 20000, categoryId: 2 });
+                    menuStore.add({ name: "ນ້ຳດື່ມ", price: 5000, categoryId: 2 });
+                }
+            };
+
+            userStore.count().onsuccess = function(e) {
+                if (e.target.result === 0) {
+                    userStore.add({ username: "admin", password: "123", role: "manager" });
+                    userStore.add({ username: "staff1", password: "123", role: "staff" });
                 }
             };
 
             tx.oncomplete = function() {
-                loadAllData();
+                if (callback) callback();
             };
         }
 
-        function loadAllData() {
-            let tx = db.transaction(["menu", "tables", "categories"], "readonly");
-            
-            tx.objectStore("categories").getAll().onsuccess = function(e) {
-                cacheCategories = e.target.result;
-                renderCategories();
-            };
+        // --- Login & Authentication ---
+        function handleLoginSubmit() {
+            const user = document.getElementById("login-user").value.trim();
+            const pass = document.getElementById("login-pass").value.trim();
 
-            tx.objectStore("menu").getAll().onsuccess = function(e) {
-                cacheMenu = e.target.result;
-                renderMenu();
-            };
+            let tx = db.transaction(["users"], "readonly");
+            let store = tx.objectStore("users");
+            let request = store.getAll();
 
-            tx.objectStore("tables").getAll().onsuccess = function(e) {
-                cacheTables = e.target.result;
-                renderTables();
-                renderAdminLists();
-            };
+            request.onsuccess = function() {
+                let found = request.result.find(u => u.username === user && u.password === pass);
+                if (found) {
+                    currentUser = found;
+                    document.getElementById("user-name-display").innerText = currentUser.username;
+                    document.getElementById("user-role-display").innerText = currentUser.role;
+                    document.getElementById("mobile-user-badge").innerText = currentUser.username;
+                    document.getElementById("user-avatar").innerText = currentUser.username.charAt(0).toUpperCase();
 
-            const datePicker = document.getElementById('report-date-select');
-            if (datePicker && !datePicker.value) {
-                datePicker.value = new Date().toISOString().split('T')[0];
+                    document.getElementById("login-screen").style.display = "none";
+                    document.getElementById("main-app").style.display = "flex";
+                } else {
+                    alert("ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ!");
+                }
+            };
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById("login-screen").style.display = "flex";
+            document.getElementById("main-app").style.display = "none";
+        }
+
+        function switchSystemMode(mode) {
+            const frontPanel = document.getElementById("panel-front-mode");
+            const backPanel = document.getElementById("panel-back-mode");
+            const sideFront = document.getElementById("side-front");
+            const sideBack = document.getElementById("side-back");
+            const mbFront = document.getElementById("mb-nav-front");
+            const mbBack = document.getElementById("mb-nav-back");
+
+            if (mode === "front") {
+                frontPanel.classList.remove("hidden");
+                backPanel.classList.add("hidden");
+                sideFront.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer bg-orange-600 text-white";
+                sideBack.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white";
+                mbFront.className = "flex-1 flex flex-col items-center justify-center text-orange-500";
+                mbBack.className = "flex-1 flex flex-col items-center justify-center text-slate-400";
+            } else {
+                if (currentUser.role !== "manager") {
+                    alert("ສິດອະນຸມັດສະເພາະຜູ້ຈັດການຮ້ານ (Manager) ເທົ່ານັ້ນ!");
+                    return;
+                }
+                frontPanel.classList.add("hidden");
+                backPanel.classList.remove("hidden");
+                sideFront.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white";
+                sideBack.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer bg-orange-600 text-white";
+                mbFront.className = "flex-1 flex flex-col items-center justify-center text-slate-400";
+                mbBack.className = "flex-1 flex flex-col items-center justify-center text-orange-500";
+                loadSalesReport();
             }
-            loadSalesReport();
         }
 
-        // --- Render UI Components ---
-        function renderCategories() {
-            const tabs = document.getElementById('front-category-tabs');
-            const typeSelect = document.getElementById('m-type');
-            if(!tabs) return;
+        // --- Data Loading & UI Rendering ---
+        function loadCategories() {
+            let tx = db.transaction(["categories"], "readonly");
+            let store = tx.objectStore("categories");
+            store.getAll().onsuccess = function(e) {
+                cacheCategories = e.target.result;
+                renderCategoryTabs();
+                renderAdminCategoryList();
+                renderCategorySelect();
+            };
+        }
 
-            let html = `<button onclick="setCategoryFilter('all')" class="p-2 text-xs font-bold rounded-xl border transition-all ${filterCatId === 'all' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'}">ທັງໝົດ</button>`;
-            let selectHtml = '';
-
-            cacheCategories.forEach(c => {
-                const active = filterCatId == c.id;
-                html += `<button onclick="setCategoryFilter(${c.id})" class="p-2 text-xs font-bold rounded-xl border transition-all ${active ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-700 border-gray-200 hover:bg-gray-50'}">${c.name}</button>`;
-                selectHtml += `<option value="${c.id}">${c.name}</option>`;
+        function renderCategoryTabs() {
+            let html = `<button onclick="selectCategoryFilter('all')" class="py-2 px-3 text-xs font-bold rounded-xl border transition-all cursor-pointer ${filterCatId === 'all' ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}">ທັງໝົດ</button>`;
+            cacheCategories.forEach(cat => {
+                let active = filterCatId === cat.id;
+                html += `<button onclick="selectCategoryFilter(${cat.id})" class="py-2 px-3 text-xs font-bold rounded-xl border transition-all cursor-pointer ${active ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}">${cat.name}</button>`;
             });
-
-            tabs.innerHTML = html;
-            if(typeSelect) typeSelect.innerHTML = selectHtml;
+            document.getElementById("front-category-tabs").innerHTML = html;
         }
 
-        function setCategoryFilter(id) {
+        function selectCategoryFilter(id) {
             filterCatId = id;
-            renderCategories();
-            renderMenu();
+            renderCategoryTabs();
+            renderMenuItems();
         }
 
-        function renderMenu() {
-            const container = document.getElementById('front-menu-items');
-            const searchVal = document.getElementById('search-input').value.toLowerCase();
-            if(!container) return;
+        function loadTables() {
+            let tx = db.transaction(["tables"], "readonly");
+            let store = tx.objectStore("tables");
+            store.getAll().onsuccess = function(e) {
+                cacheTables = e.target.result;
+                renderTableGrid();
+                renderAdminTableList();
+            };
+        }
 
+        function renderTableGrid() {
+            let html = "";
+            cacheTables.forEach(tbl => {
+                let isOccupied = tbl.status === "occupied";
+                let isSelected = currentTableName === tbl.name;
+                let bg = isSelected ? "bg-orange-50 border-orange-500 ring-2 ring-orange-500/30" : (isOccupied ? "bg-rose-50 border-rose-300 text-rose-700" : "bg-emerald-50 border-emerald-300 text-emerald-700");
+
+                html += `
+                    <button onclick="selectFrontTable('${tbl.name}')" class="p-3 rounded-xl border text-center font-bold transition-all cursor-pointer flex flex-col items-center justify-center min-h-[64px] ${bg}">
+                        <span class="text-xs ${isOccupied ? 'text-rose-800' : 'text-slate-800'}">${tbl.name}</span>
+                        <span class="text-[10px] mt-0.5 font-normal ${isOccupied ? 'text-rose-600' : 'text-emerald-600'}">${isOccupied ? 'ມີແຂກ' : 'ຫວ່າງ'}</span>
+                    </button>;
+            });
+            document.getElementById("front-table-grid").innerHTML = html;
+        }
+
+        function selectFrontTable(name) {
+            currentTableName = name;
+            let tbl = cacheTables.find(t => t.name === name);
+            activeBasket = tbl && tbl.orders ? [...tbl.orders] : [];
+
+            document.getElementById("label-selected-table").innerText = name;
+            document.getElementById("btn-manage-table-flow").classList.remove("hidden");
+            renderCartTable();
+            renderTableGrid();
+        }
+
+        function loadMenuItems() {
+            let tx = db.transaction(["menu"], "readonly");
+            let store = tx.objectStore("menu");
+            store.getAll().onsuccess = function(e) {
+                cacheMenu = e.target.result;
+                renderMenuItems();
+                renderAdminMenuList();
+            };
+        }
+
+        function renderMenuItems() {
+            let search = document.getElementById("search-input").value.toLowerCase();
             let filtered = cacheMenu.filter(m => {
-                const matchCat = (filterCatId === 'all' || m.categoryId == filterCatId);
-                const matchSearch = m.name.toLowerCase().includes(searchVal);
+                let matchCat = filterCatId === "all" || m.categoryId === filterCatId;
+                let matchSearch = m.name.toLowerCase().includes(search);
                 return matchCat && matchSearch;
             });
 
-            if(filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-8 text-gray-400 text-xs font-semibold">ບໍ່ພົບລາຍການອາຫານ</div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(m => `
-                <div onclick="addToCart(${m.id})" class="bg-white p-3 rounded-2xl border border-gray-200 shadow-xs hover:border-orange-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between h-28 active:scale-95">
-                    <span class="font-bold text-xs text-slate-900 line-clamp-2">${m.name}</span>
-                    <div class="flex justify-between items-end">
-                        <span class="text-xs font-black text-orange-600">${Number(m.price).toLocaleString()} ₭</span>
-                        <span class="h-6 w-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-plus"></i></span>
-                    </div>
-                </div>
-            `).join('');
+            let html = "";
+            filtered.forEach(item => {
+                html += `
+                    <div onclick="addToBasket(${item.id})" class="bg-white p-3 rounded-xl border border-gray-200 shadow-2xs hover:border-orange-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between">
+                        <div class="font-bold text-xs text-slate-800 mb-2">${item.name}</div>
+                        <div class="text-xs font-black text-orange-600">${item.price.toLocaleString()} ₭</div>
+                    </div>;
+            });
+            document.getElementById("front-menu-items").innerHTML = html || '<div class="col-span-full text-center text-gray-400 text-xs py-4">ບໍ່ພົບລາຍການອາຫານ</div>';
         }
 
         function filterMenu() {
-            renderMenu();
+            renderMenuItems();
         }
 
-        function renderTables() {
-            const grid = document.getElementById('front-table-grid');
-            if(!grid) return;
-
-            grid.innerHTML = cacheTables.map(t => {
-                const hasOrder = t.orders && t.orders.length > 0;
-                const isSelected = t.name === currentTableName;
-                
-                let btnStyle = "bg-white border-gray-200 text-slate-700 hover:border-slate-300";
-                if(hasOrder) btnStyle = "bg-orange-50 border-orange-300 text-orange-900";
-                if(isSelected) btnStyle = "bg-slate-900 text-white border-slate-900 ring-2 ring-orange-500";
-
-                return `
-                    <button onclick="selectTable('${t.name}')" class="p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[64px] ${btnStyle}">
-                        <span class="font-bold text-xs truncate w-full">${t.name}</span>
-                        <span class="text-[10px] mt-1 font-semibold ${hasOrder ? (isSelected ? 'text-orange-400' : 'text-orange-600') : 'text-gray-400'}">
-                            ${hasOrder ? `${t.orders.reduce((s,o)=>s+o.qty,0)} ລາຍການ` : 'ຫວ່າງ'}
-                        </span>
-                    </button>
-                `;
-            }).join('');
-        }
-
-        function selectTable(name) {
-            currentTableName = name;
-            document.getElementById('label-selected-table').innerText = name;
-            document.getElementById('btn-manage-table-flow').classList.remove('hidden');
-
-            let tableData = cacheTables.find(t => t.name === name);
-            if(tableData && tableData.orders) {
-                activeBasket = [...tableData.orders];
-            } else {
-                activeBasket = [];
+        // --- Cart Management ---
+        function addToBasket(menuId) {
+            if (!currentTableName) {
+                alert("ກະລຸນາເລືອກໂຕະກ່ອນ!");
+                return;
             }
-            
-            renderTables();
+            let item = cacheMenu.find(m => m.id === menuId);
+            if (!item) return;
+
+            let existing = activeBasket.find(b => b.id === menuId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                activeBasket.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+            }
             renderCartTable();
         }
 
-        // --- 🛒 BASKET & CART FUNCTIONS (WITH QUANTITY INCREASE / DECREASE) ---
-        function addToCart(menuId) {
-    if(!currentTableName) {
-        alert("ກະລຸນາເລືອກໂຕະກ່ອນສັ່ງອາຫານ!");
-        return;
-    }
-
-    let item = cacheMenu.find(m => m.id === menuId);
-    if(!item) return;
-
-    // ແປງ price ໃຫ້ເປັນຕົວເລກທີ່ຖືກຕ້ອງ
-    let priceNum = Number(item.price) || 0;
-
-    let existing = activeBasket.find(i => i.id === menuId);
-    if(existing) {
-        existing.qty = (Number(existing.qty) || 0) + 1;
-    } else {
-        activeBasket.push({
-            id: item.id,
-            name: item.name,
-            price: priceNum,
-            qty: 1
-        });
-    }
-
-    renderCartTable();
-}
-
-        function increaseQuantity(index) {
-            if (activeBasket[index]) {
-                activeBasket[index].qty += 1;
-                renderCartTable();
+        function updateCartQty(menuId, delta) {
+            let idx = activeBasket.findIndex(b => b.id === menuId);
+            if (idx > -1) {
+                activeBasket[idx].qty += delta;
+                if (activeBasket[idx].qty <= 0) activeBasket.splice(idx, 1);
             }
+            renderCartTable();
         }
 
-        function decreaseQuantity(index) {
-            if (activeBasket[index]) {
-                if (activeBasket[index].qty > 1) {
-                    activeBasket[index].qty -= 1;
-                } else {
-                    if (confirm("ຕ້ອງການລົບລາຍການນີ້ອອກຈາກບິນບໍ່?")) {
-                        activeBasket.splice(index, 1);
-                    }
-                }
-                renderCartTable();
-            }
-        }
-
-        function removeFromCart(index) {
-            activeBasket.splice(index, 1);
+        function removeFromCart(menuId) {
+            activeBasket = activeBasket.filter(b => b.id !== menuId);
             renderCartTable();
         }
 
         function renderCartTable() {
-    const tbody = document.getElementById('cart-table-rows');
-    if(!tbody) return;
+            let rows = "";
+            let total = 0;
+            let count = 0;
 
-    tbody.innerHTML = '';
-    let total = 0;
+            activeBasket.forEach(item => {
+                let sum = item.price * item.qty;
+                total += sum;
+                count += item.qty;
+                rows += `
+                    <tr class="text-xs">
+                        <td class="py-2.5 font-medium text-slate-800">${item.name}</td>
+                        <td class="py-2.5 text-center">
+                            <div class="inline-flex items-center gap-1 bg-slate-100 rounded-md p-0.5">
+                                <button onclick="updateCartQty(${item.id}, -1)" class="w-5 h-5 flex items-center justify-center bg-white rounded shadow-2xs font-bold text-slate-700">-</button>
+                                <span class="w-6 text-center font-bold text-xs">${item.qty}</span>
+                                <button onclick="updateCartQty(${item.id}, 1)" class="w-5 h-5 flex items-center justify-center bg-white rounded shadow-2xs font-bold text-slate-700">+</button>
+                            </div>
+                        </td>
+                        <td class="py-2.5 text-right font-bold text-slate-900">${sum.toLocaleString()}</td>
+                        <td class="py-2.5 text-center">
+                            <button onclick="removeFromCart(${item.id})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>;
+            });
 
-    activeBasket.forEach((item, index) => {
-        // ແປງຄ່າໃຫ້ເປັນຕົວເລກສະເໝີ ເພື່ອປ້ອງກັນ NaN
-        const price = Number(item.price) || 0;
-        const qty = Number(item.qty) || 0;
-        const itemTotal = price * qty;
-        
-        total += itemTotal;
+            document.getElementById("cart-table-rows").innerHTML = rows || '<tr><td colspan="4" class="text-center text-gray-400 py-6 text-xs">ຍັງບໍ່ມີລາຍການສັ່ງ</td></tr>';
+            document.getElementById("text-total-price").innerText = total.toLocaleString();
+            document.getElementById("mobile-cart-count").innerText = count;
+            liveCalcChange();
+        }
 
-        const tr = document.createElement('tr');
-        tr.className = "border-b border-gray-100 hover:bg-slate-50";
-        tr.innerHTML = `
-            <td class="py-2.5 font-medium text-slate-800">${item.name}</td>
-            
-            <td class="py-2.5 text-center">
-                <div class="inline-flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
-                    <button onclick="decreaseQuantity(${index})" 
-                            class="px-2 py-1 bg-gray-100 hover:bg-rose-100 text-gray-700 hover:text-rose-600 font-bold transition-all cursor-pointer">
-                        <i class="fa-solid fa-minus text-[10px]"></i>
-                    </button>
-                    <span class="px-2 font-bold text-xs text-slate-900 min-w-[20px] text-center">${qty}</span>
-                    <button onclick="increaseQuantity(${index})" 
-                            class="px-2 py-1 bg-gray-100 hover:bg-emerald-100 text-gray-700 hover:text-emerald-600 font-bold transition-all cursor-pointer">
-                        <i class="fa-solid fa-plus text-[10px]"></i>
-                    </button>
-                </div>
-            </td>
-            
-            <td class="py-2.5 text-right font-bold text-slate-900">${itemTotal.toLocaleString()}</td>
-            
-            <td class="py-2.5 text-center">
-                <button onclick="removeFromCart(${index})" 
-                        class="text-gray-400 hover:text-rose-600 transition-colors p-1 cursor-pointer">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-
-    document.getElementById('text-total-price').innerText = total.toLocaleString();
-    document.getElementById('mobile-cart-count').innerText = activeBasket.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
-    
-    liveCalcChange();
-}
-
-        // --- Save Order to Table ---
         function fastSaveOrderToTable() {
-            if(!currentTableName) {
-                alert("ກະລຸນາເລືອກໂຕະ!");
+            if (!currentTableName) {
+                alert("ກະລຸນາເລືອກໂຕະກ່ອນ!");
                 return;
             }
+            let tbl = cacheTables.find(t => t.name === currentTableName);
+            if (!tbl) return;
 
-            let tableData = cacheTables.find(t => t.name === currentTableName);
-            if(!tableData) return;
+            tbl.orders = activeBasket;
+            tbl.status = activeBasket.length > 0 ? "occupied" : "available";
 
             let tx = db.transaction(["tables"], "readwrite");
-            tableData.orders = [...activeBasket];
-            
-            tx.objectStore("tables").put(tableData).onsuccess = function() {
-                alert("ບັນທຶກອໍເດີ້ ແລະ ສົ່ງເຂົ້າຄົວສຳເລັດ!");
-                loadAllData();
+            tx.objectStore("tables").put(tbl);
+            tx.oncomplete = function() {
+                loadTables();
+                alert(`ບັນທຶກອໍເດີ້ສຳລັບ ${currentTableName} เรียບຮ້ອຍ!`);
             };
         }
 
-        // --- Payment & Receipt Logic ---
-        function liveCalcChange() {
-    let total = activeBasket.reduce((s, i) => s + ((Number(i.price) || 0) * (Number(i.qty) || 0)), 0);
-    let cash = Number(document.getElementById('input-cash').value) || 0;
-    let transfer = Number(document.getElementById('input-transfer').value) || 0;
-
-    let change = (cash + transfer) - total;
-    document.getElementById('text-change-price').innerText = change >= 0 ? change.toLocaleString() : "0";
-}
+        // --- Payment & Calculations ---
         function fillFullAmount(type) {
-            let total = activeBasket.reduce((s, i) => s + (i.price * i.qty), 0);
-            if(type === 'cash') {
-                document.getElementById('input-cash').value = total;
-                document.getElementById('input-transfer').value = "";
+            let total = calculateBasketTotal();
+            if (type === 'cash') {
+                document.getElementById("input-cash").value = total;
+                document.getElementById("input-transfer").value = 0;
             } else {
-                document.getElementById('input-transfer').value = total;
-                document.getElementById('input-cash').value = "";
+                document.getElementById("input-transfer").value = total;
+                document.getElementById("input-cash").value = 0;
             }
             liveCalcChange();
         }
 
+        function calculateBasketTotal() {
+            return activeBasket.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        }
+
+        function liveCalcChange() {
+            let total = calculateBasketTotal();
+            let cash = parseFloat(document.getElementById("input-cash").value) || 0;
+            let transfer = parseFloat(document.getElementById("input-transfer").value) || 0;
+            let paid = cash + transfer;
+            let change = paid - total;
+
+            document.getElementById("text-change-price").innerText = (change >= 0 ? change : 0).toLocaleString();
+        }
+
         function fastProcessPayment() {
-            if(!currentTableName || activeBasket.length === 0) {
+            if (!currentTableName || activeBasket.length === 0) {
                 alert("ບໍ່ມີລາຍການອາຫານໃນບິນ!");
                 return;
             }
 
-            let total = activeBasket.reduce((s, i) => s + (i.price * i.qty), 0);
-            let cash = Number(document.getElementById('input-cash').value) || 0;
-            let transfer = Number(document.getElementById('input-transfer').value) || 0;
+            let total = calculateBasketTotal();
+            let cash = parseFloat(document.getElementById("input-cash").value) || 0;
+            let transfer = parseFloat(document.getElementById("input-transfer").value) || 0;
+            let paid = cash + transfer;
 
-            if((cash + transfer) < total) {
-                alert("ຈຳນວນເງິນທີ່ຮັບມາບໍ່ພໍດີກັບຍອດລວມ!");
+            if (paid < total) {
+                alert("ຈຳນວນເງິນທີ່ຮັບມາບໍ່ພຽງພໍກັບຍອດລວມ!");
                 return;
             }
 
             let saleRecord = {
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString(),
                 tableName: currentTableName,
                 items: [...activeBasket],
-                total: total,
-                cash: cash,
-                transfer: transfer,
-                change: (cash + transfer) - total,
-                cashier: currentUser ? currentUser.username : "staff"
+                totalAmount: total,
+                cashPaid: cash,
+                transferPaid: transfer,
+                change: paid - total,
+                cashier: currentUser.username,
+                timestamp: new Date().toISOString()
             };
 
             let tx = db.transaction(["sales", "tables"], "readwrite");
             tx.objectStore("sales").add(saleRecord);
 
-            let tableData = cacheTables.find(t => t.name === currentTableName);
-            if(tableData) {
-                tableData.orders = [];
-                tx.objectStore("tables").put(tableData);
+            let tbl = cacheTables.find(t => t.name === currentTableName);
+            if (tbl) {
+                tbl.orders = [];
+                tbl.status = "available";
+                tx.objectStore("tables").put(tbl);
             }
 
             tx.oncomplete = function() {
                 openReceiptModal(saleRecord);
                 activeBasket = [];
-                document.getElementById('input-cash').value = "";
-                document.getElementById('input-transfer').value = "";
-                loadAllData();
+                document.getElementById("input-cash").value = "";
+                document.getElementById("input-transfer").value = "";
+                renderCartTable();
+                loadTables();
             };
         }
 
-        function openReceiptModal(data) {
-            document.getElementById('r-meta').innerText = `ວັນທີ: ${data.date} ${data.time} | ໂຕະ: ${data.tableName}`;
-            document.getElementById('r-total').innerText = `${data.total.toLocaleString()} ₭`;
-            document.getElementById('r-cash').innerText = `${data.cash.toLocaleString()} ₭`;
-            document.getElementById('r-transfer').innerText = `${data.transfer.toLocaleString()} ₭`;
-            document.getElementById('r-change').innerText = `${data.change.toLocaleString()} ₭`;
-            document.getElementById('r-cashier').innerText = `ພະນັກງານເກັບເງິນ: ${data.cashier}`;
+        function testPrintReceipt() {
+            let mockRecord = {
+                tableName: currentTableName || "ໂຕະ ທົດລອງ",
+                items: activeBasket.length > 0 ? activeBasket : [{ name: "ລາຍການທົດລອງ", price: 25000, qty: 1 }],
+                totalAmount: activeBasket.length > 0 ? calculateBasketTotal() : 25000,
+                cashPaid: 30000,
+                transferPaid: 0,
+                change: 5000,
+                cashier: currentUser.username,
+                timestamp: new Date().toISOString()
+            };
+            openReceiptModal(mockRecord);
+        }
 
-            const tbody = document.getElementById('r-items');
-            tbody.innerHTML = data.items.map(i => `
-                <tr class="py-1">
-                    <td class="py-1">${i.name}</td>
-                    <td class="py-1 text-center">${i.qty}</td>
-                    <td class="py-1 text-right">${(i.price * i.qty).toLocaleString()}</td>
-                </tr>
-            `).join('');
+        function openReceiptModal(record) {
+            let itemsHtml = "";
+            record.items.forEach(item => {
+                itemsHtml += `
+                    <tr>
+                        <td class="py-1">${item.name}</td>
+                        <td class="py-1 text-center">${item.qty}</td>
+                        <td class="py-1 text-right">${(item.price * item.qty).toLocaleString()}</td>
+                    </tr>;
+            });
 
-            document.getElementById('receiptModal').classList.remove('hidden');
+            document.getElementById("r-items").innerHTML = itemsHtml;
+            document.getElementById("r-meta").innerText = `ໂຕະ: ${record.tableName} | ວັນທີ: ${new Date(record.timestamp).toLocaleString('lo-LA')}`;
+            document.getElementById("r-total").innerText = `${record.totalAmount.toLocaleString()} ₭`;
+            document.getElementById("r-cash").innerText = `${record.cashPaid.toLocaleString()} ₭`;
+            document.getElementById("r-transfer").innerText = `${record.transferPaid.toLocaleString()} ₭`;
+            document.getElementById("r-change").innerText = `${record.change.toLocaleString()} ₭`;
+            document.getElementById("r-cashier").innerText = `ພະນັກງານອອກບິນ: ${record.cashier}`;
+
+            document.getElementById("receiptModal").classList.remove("hidden");
         }
 
         function closeReceiptModal() {
-            document.getElementById('receiptModal').classList.add('hidden');
+            document.getElementById("receiptModal").classList.add("hidden");
         }
 
-        function testPrintReceipt() {
-            openReceiptModal({
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString(),
-                tableName: "ໂຕະ ທົດລອງ",
-                items: [{ name: "ທົດລອງພິມ", qty: 1, price: 50000 }],
-                total: 50000,
-                cash: 50000,
-                transfer: 0,
-                change: 0,
-                cashier: "Admin"
-            });
-        }
-
-        // --- Move & Merge Table Logic ---
+        // --- Table Actions (Move / Merge) ---
         function openTableActionModal() {
-            if(!currentTableName) return;
-            document.getElementById('text-action-src-table').innerText = currentTableName;
+            if (!currentTableName) return;
+            document.getElementById("text-action-src-table").innerText = currentTableName;
+            document.getElementById("tableActionModal").classList.remove("hidden");
             toggleTableActionTab('move');
-            document.getElementById('tableActionModal').classList.remove('hidden');
         }
 
         function closeTableActionModal() {
-            document.getElementById('tableActionModal').classList.add('hidden');
+            document.getElementById("tableActionModal").classList.add("hidden");
             selectedTargetTableId = null;
         }
 
         function toggleTableActionTab(mode) {
             tableActionMode = mode;
-            const btnMove = document.getElementById('btn-tab-move');
-            const btnMerge = document.getElementById('btn-tab-merge');
+            let btnMove = document.getElementById("btn-tab-move");
+            let btnMerge = document.getElementById("btn-tab-merge");
 
-            if(mode === 'move') {
+            if (mode === 'move') {
                 btnMove.className = "py-2 text-center font-bold text-xs rounded-lg transition-all cursor-pointer bg-white text-orange-600 shadow-xs";
                 btnMerge.className = "py-2 text-center font-bold text-xs rounded-lg text-slate-600 transition-all cursor-pointer";
-                document.getElementById('label-target-desc').innerText = "ເລືອກໂຕະປາຍທາງ (ຕ້ອງເປັນໂຕະຫວ່າງ)";
+                document.getElementById("label-target-desc").innerText = "ເລືອກໂຕະປາຍທາງ (ຕ້ອງເປັນໂຕະຫວ່າງ)";
             } else {
                 btnMerge.className = "py-2 text-center font-bold text-xs rounded-lg transition-all cursor-pointer bg-white text-emerald-600 shadow-xs";
                 btnMove.className = "py-2 text-center font-bold text-xs rounded-lg text-slate-600 transition-all cursor-pointer";
-                document.getElementById('label-target-desc').innerText = "ເລືອກໂຕະປາຍທາງທີ່ຕ້ອງການລວມບິນເຂົ້າກັນ";
+                document.getElementById("label-target-desc").innerText = "ເລືອກໂຕະປາຍທາງທີ່ຈະລວມເຂົ້າກັນ";
             }
             renderTargetTablesGrid();
         }
 
         function renderTargetTablesGrid() {
-            const container = document.getElementById('grid-action-target-tables');
-            if(!container) return;
+            let html = "";
+            cacheTables.forEach(tbl => {
+                if (tbl.name === currentTableName) return;
+                let valid = tableActionMode === 'move' ? tbl.status === 'available' : true;
+                let isSelected = selectedTargetTableId === tbl.id;
 
-            let targets = cacheTables.filter(t => t.name !== currentTableName);
-            if(tableActionMode === 'move') {
-                targets = targets.filter(t => !t.orders || t.orders.length === 0);
-            }
-
-            container.innerHTML = targets.map(t => `
-                <button onclick="selectTargetTable(${t.id})" class="p-2 border rounded-lg text-xs font-bold transition-all ${selectedTargetTableId === t.id ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-800 border-gray-200 hover:bg-gray-100'}">
-                    ${t.name}
-                </button>
-            `).join('');
+                html += `
+                    <button onclick="${valid ? `selectTargetTable(${tbl.id})` : ''}" class="p-2 rounded-lg text-xs font-bold border transition-all ${!valid ? 'opacity-40 cursor-not-allowed bg-gray-100 text-gray-400' : (isSelected ? 'bg-orange-600 text-white border-orange-600' : 'bg-white text-slate-800 border-gray-200 hover:bg-orange-50')}">
+                        ${tbl.name} (${tbl.status === 'occupied' ? 'ມີແຂກ' : 'ຫວ່າງ'})
+                    </button>;
+            });
+            document.getElementById("grid-action-target-tables").innerHTML = html;
         }
 
         function selectTargetTable(id) {
@@ -862,273 +887,264 @@
         }
 
         function executeTableAction() {
-            if(!selectedTargetTableId) {
+            if (!selectedTargetTableId) {
                 alert("ກະລຸນາເລືອກໂຕະປາຍທາງ!");
                 return;
             }
 
-            let srcTable = cacheTables.find(t => t.name === currentTableName);
-            let targetTable = cacheTables.find(t => t.id === selectedTargetTableId);
+            let srcTbl = cacheTables.find(t => t.name === currentTableName);
+            let targetTbl = cacheTables.find(t => t.id === selectedTargetTableId);
 
-            if(!srcTable || !targetTable) return;
+            if (!srcTbl || !targetTbl) return;
 
             let tx = db.transaction(["tables"], "readwrite");
             let store = tx.objectStore("tables");
 
-            if(tableActionMode === 'move') {
-                targetTable.orders = [...srcTable.orders];
-                srcTable.orders = [];
+            if (tableActionMode === 'move') {
+                targetTbl.orders = srcTbl.orders;
+                targetTbl.status = srcTbl.orders.length > 0 ? "occupied" : "available";
+                srcTbl.orders = [];
+                srcTbl.status = "available";
             } else {
-                // Merge items
-                srcTable.orders.forEach(item => {
-                    let existing = targetTable.orders.find(o => o.id === item.id);
-                    if(existing) {
+                // Merge
+                srcTbl.orders.forEach(item => {
+                    let existing = targetTbl.orders.find(o => o.id === item.id);
+                    if (existing) {
                         existing.qty += item.qty;
                     } else {
-                        targetTable.orders.push({...item});
+                        targetTbl.orders.push({ ...item });
                     }
                 });
-                srcTable.orders = [];
+                targetTbl.status = "occupied";
+                srcTbl.orders = [];
+                srcTbl.status = "available";
             }
 
-            store.put(srcTable);
-            store.put(targetTable);
+            store.put(srcTbl);
+            store.put(targetTbl);
 
             tx.oncomplete = function() {
-                alert(tableActionMode === 'move' ? "ຍ້າຍໂຕະສຳເລັດ!" : "ລວມໂຕະສຳເລັດ!");
                 closeTableActionModal();
-                selectTable(targetTable.name);
-                loadAllData();
+                loadTables();
+                selectFrontTable(targetTbl.name);
+                alert("ດຳເນີນການສຳເລັດ!");
             };
         }
 
-        // --- Back-Office Admin Functions ---
+        // --- Back-Office Admin Management ---
+        function renderCategorySelect() {
+            let options = '<option value="">-- ເລືອກໝວດໝູ່ --</option>';
+            cacheCategories.forEach(c => {
+                options += `<option value="${c.id}">${c.name}</option>`;
+            });
+            document.getElementById("m-type").innerHTML = options;
+        }
+
         function addCategory() {
-            let name = document.getElementById('c-name').value.trim();
-            if(!name) return;
+            let name = document.getElementById("c-name").value.trim();
+            if (!name) return;
+
             let tx = db.transaction(["categories"], "readwrite");
-            tx.objectStore("categories").add({ name: name }).onsuccess = function() {
-                document.getElementById('c-name').value = "";
-                loadAllData();
+            tx.objectStore("categories").add({ name });
+            tx.oncomplete = function() {
+                document.getElementById("c-name").value = "";
+                loadCategories();
             };
+        }
+
+        function renderAdminCategoryList() {
+            let html = "";
+            cacheCategories.forEach(c => {
+                html += `
+                    <div class="flex justify-between items-center py-1.5 px-2 text-xs">
+                        <span class="font-medium text-slate-800">${c.name}</span>
+                        <button onclick="deleteCategory(${c.id})" class="text-rose-500 hover:text-rose-700 text-[10px] font-bold">ລົບ</button>
+                    </div>;
+            });
+            document.getElementById("admin-category-list").innerHTML = html;
+        }
+
+        function deleteCategory(id) {
+            let tx = db.transaction(["categories"], "readwrite");
+            tx.objectStore("categories").delete(id);
+            tx.oncomplete = function() { loadCategories(); };
         }
 
         function addTable() {
-            let name = document.getElementById('t-name').value.trim();
-            if(!name) return;
+            let name = document.getElementById("t-name").value.trim();
+            if (!name) return;
+
             let tx = db.transaction(["tables"], "readwrite");
-            tx.objectStore("tables").add({ name: name, orders: [] }).onsuccess = function() {
-                document.getElementById('t-name').value = "";
-                loadAllData();
+            tx.objectStore("tables").add({ name, status: "available", orders: [] });
+            tx.oncomplete = function() {
+                document.getElementById("t-name").value = "";
+                loadTables();
             };
         }
 
-        function addMenu() {
-            let name = document.getElementById('m-name').value.trim();
-            let price = Number(document.getElementById('m-price').value);
-            let type = document.getElementById('m-type').value;
+        function renderAdminTableList() {
+            let html = "";
+            cacheTables.forEach(t => {
+                html += `
+                    <div class="flex justify-between items-center py-1.5 px-2 text-xs">
+                        <span class="font-medium text-slate-800">${t.name}</span>
+                        <button onclick="deleteTable(${t.id})" class="text-rose-500 hover:text-rose-700 text-[10px] font-bold">ລົບ</button>
+                    </div>;
+            });
+            document.getElementById("admin-table-list").innerHTML = html;
+        }
 
-            if(!name || !price) return;
+        function deleteTable(id) {
+            let tx = db.transaction(["tables"], "readwrite");
+            tx.objectStore("tables").delete(id);
+            tx.oncomplete = function() { loadTables(); };
+        }
+
+        function addMenu() {
+            let name = document.getElementById("m-name").value.trim();
+            let price = parseFloat(document.getElementById("m-price").value);
+            let catId = parseInt(document.getElementById("m-type").value);
+
+            if (!name || isNaN(price) || !catId) {
+                alert("ກະລຸນາປ້ອນຂໍ້ມູນເມນູໃຫ້ຄົບຖ້ວນ!");
+                return;
+            }
 
             let tx = db.transaction(["menu"], "readwrite");
-            tx.objectStore("menu").add({
-                name: name,
-                price: price,
-                categoryId: type
-            }).onsuccess = function() {
-                document.getElementById('m-name').value = "";
-                document.getElementById('m-price').value = "";
-                loadAllData();
+            tx.objectStore("menu").add({ name, price, categoryId: catId });
+            tx.oncomplete = function() {
+                document.getElementById("m-name").value = "";
+                document.getElementById("m-price").value = "";
+                loadMenuItems();
+            };
+        }
+
+        function renderAdminMenuList() {
+            let html = "";
+            cacheMenu.forEach(m => {
+                html += `
+                    <div class="flex justify-between items-center py-1.5 px-2 text-xs">
+                        <div>
+                            <span class="font-bold text-slate-800">${m.name}</span>
+                            <span class="text-[10px] text-orange-600 ml-1 font-semibold">(${m.price.toLocaleString()} ₭)</span>
+                        </div>
+                        <button onclick="deleteMenu(${m.id})" class="text-rose-500 hover:text-rose-700 text-[10px] font-bold">ລົບ</button>
+                    </div>;
+            });
+            document.getElementById("admin-menu-list").innerHTML = html;
+        }
+
+        function deleteMenu(id) {
+            let tx = db.transaction(["menu"], "readwrite");
+            tx.objectStore("menu").delete(id);
+            tx.oncomplete = function() { loadMenuItems(); };
+        }
+
+        function loadUsers() {
+            let tx = db.transaction(["users"], "readonly");
+            tx.objectStore("users").getAll().onsuccess = function(e) {
+                renderAdminUserList(e.target.result);
             };
         }
 
         function addNewUserAccount() {
-            let user = document.getElementById('u-username').value.trim();
-            let pass = document.getElementById('u-password').value.trim();
-            let role = document.getElementById('u-role').value;
+            let u = document.getElementById("u-username").value.trim();
+            let p = document.getElementById("u-password").value.trim();
+            let r = document.getElementById("u-role").value;
 
-            if(!user || !pass) return;
+            if (!u || !p) {
+                alert("ກະລຸນາປ້ອນຊື່ຜູ້ໃຊ້ ແລະ ລະຫັດຜ່ານ!");
+                return;
+            }
 
             let tx = db.transaction(["users"], "readwrite");
-            tx.objectStore("users").add({ username: user, password: pass, role: role }).onsuccess = function() {
-                document.getElementById('u-username').value = "";
-                document.getElementById('u-password').value = "";
-                alert("ເພີ່ມພະນັກງານສຳເລັດ!");
-                renderAdminLists();
+            tx.objectStore("users").add({ username: u, password: p, role: r });
+            tx.oncomplete = function() {
+                document.getElementById("u-username").value = "";
+                document.getElementById("u-password").value = "";
+                loadUsers();
             };
         }
 
-        function deleteItem(storeName, id) {
-            if(!confirm("ທ່ານຕ້ອງການລົບລາຍການນີ້ແທ້ບໍ່?")) return;
-            let tx = db.transaction([storeName], "readwrite");
-            tx.objectStore(storeName).delete(id).onsuccess = function() {
-                loadAllData();
-            };
-        }
-
-        function renderAdminLists() {
-            // Render Admin Categories
-            const catList = document.getElementById('admin-category-list');
-            if(catList) {
-                catList.innerHTML = cacheCategories.map(c => `
-                    <div class="flex justify-between items-center p-2 text-xs">
-                        <span>${c.name}</span>
-                        <button onclick="deleteItem('categories', ${c.id})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `).join('');
-            }
-
-            // Render Admin Tables
-            const tabList = document.getElementById('admin-table-list');
-            if(tabList) {
-                tabList.innerHTML = cacheTables.map(t => `
-                    <div class="flex justify-between items-center p-2 text-xs">
-                        <span>${t.name}</span>
-                        <button onclick="deleteItem('tables', ${t.id})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `).join('');
-            }
-
-            // Render Admin Menu
-            const menuList = document.getElementById('admin-menu-list');
-            if(menuList) {
-                menuList.innerHTML = cacheMenu.map(m => `
-                    <div class="flex justify-between items-center p-2 text-xs">
+        function renderAdminUserList(users) {
+            let html = "";
+            users.forEach(u => {
+                html += `
+                    <div class="flex justify-between items-center py-1.5 px-2 text-xs">
                         <div>
-                            <div class="font-bold">${m.name}</div>
-                            <div class="text-[10px] text-gray-500">${Number(m.price).toLocaleString()} ₭</div>
+                            <span class="font-bold text-slate-800">${u.username}</span>
+                            <span class="text-[10px] text-gray-500 ml-1">(${u.role})</span>
                         </div>
-                        <button onclick="deleteItem('menu', ${m.id})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `).join('');
-            }
+                        <button onclick="deleteUser(${u.id})" class="text-rose-500 hover:text-rose-700 text-[10px] font-bold">ລົບ</button>
+                    </div>;
+            });
+            document.getElementById("admin-user-list").innerHTML = html;
+        }
 
-            // Render Admin Users
-            const userList = document.getElementById('admin-user-list');
-            if(userList) {
-                let tx = db.transaction(["users"], "readonly");
-                tx.objectStore("users").getAll().onsuccess = function(e) {
-                    userList.innerHTML = e.target.result.map(u => `
-                        <div class="flex justify-between items-center p-2 text-xs">
-                            <div>
-                                <span class="font-bold">${u.username}</span>
-                                <span class="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded ml-1">${u.role}</span>
-                            </div>
-                            <button onclick="deleteItem('users', '${u.username}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    `).join('');
-                };
-            }
+        function deleteUser(id) {
+            let tx = db.transaction(["users"], "readwrite");
+            tx.objectStore("users").delete(id);
+            tx.oncomplete = function() { loadUsers(); };
+        }
+
+        // --- Sales Report Logic ---
+        function initTodayDate() {
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById("report-date-select").value = today;
         }
 
         function loadSalesReport() {
-            const dateVal = document.getElementById('report-date-select').value;
-            if(!dateVal) return;
-
+            let selectedDate = document.getElementById("report-date-select").value;
             let tx = db.transaction(["sales"], "readonly");
-            tx.objectStore("sales").getAll().onsuccess = function(e) {
-                let sales = e.target.result.filter(s => s.date === dateVal);
-                
-                let sum = sales.reduce((a, b) => a + b.total, 0);
-                let cash = sales.reduce((a, b) => a + b.cash, 0);
-                let transfer = sales.reduce((a, b) => a + b.transfer, 0);
+            let store = tx.objectStore("sales");
 
-                document.getElementById('text-revenue-sum').innerText = sum.toLocaleString();
-                document.getElementById('text-revenue-cash').innerText = cash.toLocaleString();
-                document.getElementById('text-revenue-transfer').innerText = transfer.toLocaleString();
-                document.getElementById('front-revenue-tag').innerText = `ຍອດມື້ນີ້: ${sum.toLocaleString()} ກີບ`;
+            store.getAll().onsuccess = function(e) {
+                let sales = e.target.result.filter(s => s.timestamp.startsWith(selectedDate));
+                let totalRev = 0;
+                let cashRev = 0;
+                let transferRev = 0;
+                let rowsHtml = "";
 
-                const historyContainer = document.getElementById('sales-history-rows');
-                if(historyContainer) {
-                    historyContainer.innerHTML = sales.map(s => `
-                        <div class="bg-white/10 p-2 rounded-lg text-xs flex justify-between items-center">
+                sales.forEach(s => {
+                    totalRev += s.totalAmount;
+                    cashRev += s.cashPaid;
+                    transferRev += s.transferPaid;
+
+                    rowsHtml += `
+                        <div class="flex justify-between items-center text-xs bg-white/5 p-2 rounded-lg border border-white/5">
                             <div>
-                                <span class="font-bold text-orange-300">${s.tableName}</span>
-                                <span class="text-[10px] text-gray-400 ml-2">${s.time}</span>
+                                <span class="font-bold text-white">${s.tableName}</span>
+                                <span class="text-[10px] text-slate-400 ml-2">${new Date(s.timestamp).toLocaleTimeString()}</span>
                             </div>
-                            <div class="font-black">${s.total.toLocaleString()} ₭</div>
-                        </div>
-                    `).join('');
-                }
+                            <div class="font-bold text-orange-400">${s.totalAmount.toLocaleString()} ₭</div>
+                        </div>;
+                });
+
+                document.getElementById("text-revenue-sum").innerText = totalRev.toLocaleString();
+                document.getElementById("text-revenue-cash").innerText = cashRev.toLocaleString();
+                document.getElementById("text-revenue-transfer").innerText = transferRev.toLocaleString();
+                document.getElementById("front-revenue-tag").innerText = `ຍອດມື້ນີ້: ${totalRev.toLocaleString()} ກີບ`;
+                document.getElementById("sales-history-rows").innerHTML = rowsHtml || '<div class="text-xs text-slate-500 py-2">ບໍ່ມີປະຫວັດການຂາຍໃນວັນທີນີ້</div>';
             };
-        }
-
-        // --- System Mode & Layout Navigation ---
-        function switchSystemMode(mode) {
-            const frontPanel = document.getElementById('panel-front-mode');
-            const backPanel = document.getElementById('panel-back-mode');
-            const btnSideFront = document.getElementById('side-front');
-            const btnSideBack = document.getElementById('side-back');
-            const btnMbFront = document.getElementById('mb-nav-front');
-            const btnMbBack = document.getElementById('mb-nav-back');
-
-            if(mode === 'front') {
-                frontPanel.classList.remove('hidden');
-                backPanel.classList.add('hidden');
-                btnSideFront.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer bg-orange-600 text-white";
-                btnSideBack.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white";
-                btnMbFront.className = "flex-1 flex flex-col items-center justify-center text-orange-500";
-                btnMbBack.className = "flex-1 flex flex-col items-center justify-center text-slate-400";
-            } else {
-                frontPanel.classList.add('hidden');
-                backPanel.classList.remove('hidden');
-                btnSideBack.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer bg-orange-600 text-white";
-                btnSideFront.className = "flex items-center w-full px-4 py-3 text-sm font-medium rounded-xl transition-all cursor-pointer text-slate-400 hover:bg-slate-800 hover:text-white";
-                btnMbBack.className = "flex-1 flex flex-col items-center justify-center text-orange-500";
-                btnMbFront.className = "flex-1 flex flex-col items-center justify-center text-slate-400";
-            }
         }
 
         function toggleMobileView(view) {
-            const secMenu = document.getElementById('m-sec-menu');
-            const secCart = document.getElementById('m-sec-cart');
-            const btnMenu = document.getElementById('btn-m-view-menu');
-            const btnCart = document.getElementById('btn-m-view-cart');
+            const menuSec = document.getElementById("m-sec-menu");
+            const cartSec = document.getElementById("m-sec-cart");
+            const btnMenu = document.getElementById("btn-m-view-menu");
+            const btnCart = document.getElementById("btn-m-view-cart");
 
-            if(view === 'menu') {
-                secMenu.classList.remove('hidden');
-                secCart.classList.add('hidden');
-                secCart.classList.remove('flex');
+            if (view === 'menu') {
+                menuSec.classList.remove("hidden");
+                cartSec.classList.add("hidden");
                 btnMenu.className = "flex-1 py-2.5 text-center font-bold text-xs rounded-lg transition-all bg-white text-orange-600 shadow-xs";
-                btnCart.className = "flex-1 py-2.5 text-center font-bold text-xs rounded-lg transition-all text-gray-600";
+                btnCart.className = "flex-1 py-2.5 text-center font-bold text-xs rounded-lg text-gray-600";
             } else {
-                secMenu.classList.add('hidden');
-                secCart.classList.remove('hidden');
-                secCart.classList.add('flex');
+                cartSec.classList.remove("hidden");
+                menuSec.classList.add("hidden");
                 btnCart.className = "flex-1 py-2.5 text-center font-bold text-xs rounded-lg transition-all bg-white text-orange-600 shadow-xs";
-                btnMenu.className = "flex-1 py-2.5 text-center font-bold text-xs rounded-lg transition-all text-gray-600";
+                btnMenu.className = "flex-1 py-2.5 text-center font-bold text-xs rounded-lg text-gray-600";
             }
-        }
-
-        // --- Authentication ---
-        function handleLoginSubmit() {
-            let u = document.getElementById('login-user').value.trim();
-            let p = document.getElementById('login-pass').value.trim();
-
-            let tx = db.transaction(["users"], "readonly");
-            tx.objectStore("users").get(u).onsuccess = function(e) {
-                let user = e.target.result;
-                if(user && user.password === p) {
-                    currentUser = user;
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-app').style.display = 'flex';
-                    
-                    document.getElementById('user-name-display').innerText = user.username;
-                    document.getElementById('user-role-display').innerText = user.role;
-                    document.getElementById('user-avatar').innerText = user.username.charAt(0).toUpperCase();
-                    document.getElementById('mobile-user-badge').innerText = user.username;
-
-                    loadAllData();
-                } else {
-                    alert("ຊື່ຜູ້ໃຊ້ງານ ຫຼື ລະຫັດຜ່ານ ບໍ່ຖືກຕ້ອງ!");
-                }
-            };
-        }
-
-        function handleLogout() {
-            currentUser = null;
-            document.getElementById('main-app').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
         }
     </script>
 </body>
