@@ -1018,34 +1018,53 @@
         }
 
         function loadSalesReport() {
-            const dateVal = document.getElementById('report-date-select').value;
-            if(!dateVal) return;
+            let dateVal = document.getElementById("report-date-select").value;
+            let targetDate = dateVal ? new Date(dateVal) : new Date();
 
             let tx = db.transaction(["sales"], "readonly");
             tx.objectStore("sales").getAll().onsuccess = function(e) {
-                let sales = e.target.result.filter(s => s.date === dateVal);
-                
-                let sum = sales.reduce((a, b) => a + b.total, 0);
-                let cash = sales.reduce((a, b) => a + b.cash, 0);
-                let transfer = sales.reduce((a, b) => a + b.transfer, 0);
+                let allSales = e.target.result || [];
+                let filtered = allSales.filter(s => {
+                    if (!s || !s.timestamp) return false;
+                    let d = new Date(s.timestamp);
+                    return d.toDateString() === targetDate.toDateString();
+                });
 
-                document.getElementById('text-revenue-sum').innerText = sum.toLocaleString();
-                document.getElementById('text-revenue-cash').innerText = cash.toLocaleString();
-                document.getElementById('text-revenue-transfer').innerText = transfer.toLocaleString();
-                document.getElementById('front-revenue-tag').innerText = `ຍອດມື້ນີ້: ${sum.toLocaleString()} ກີບ`;
+                let sumTotal = 0, sumCash = 0, sumTransfer = 0;
+                filtered.forEach(s => {
+                    // ປ່ຽນຄ່າເປັນ Number ແລະ ໃສ່ || 0 ປ້ອງກັນ NaN
+                    sumTotal += Number(s.total || 0);
+                    sumCash += Number(s.cash || 0);
+                    sumTransfer += Number(s.transfer || 0);
+                });
 
-                const historyContainer = document.getElementById('sales-history-rows');
-                if(historyContainer) {
-                    historyContainer.innerHTML = sales.map(s => `
-                        <div class="bg-white/10 p-2 rounded-lg text-xs flex justify-between items-center">
-                            <div>
-                                <span class="font-bold text-orange-300">${s.tableName}</span>
-                                <span class="text-[10px] text-gray-400 ml-2">${s.time}</span>
-                            </div>
-                            <div class="font-black">${s.total.toLocaleString()} ₭</div>
+                // ກວດເຊັກ NaN ຂັ້ນສຸດທ້າຍກ່ອນສະແດງຜົນ
+                document.getElementById("text-revenue-sum").innerText = (isNaN(sumTotal) ? 0 : sumTotal).toLocaleString();
+                document.getElementById("text-revenue-cash").innerText = (isNaN(sumCash) ? 0 : sumCash).toLocaleString();
+                document.getElementById("text-revenue-transfer").innerText = (isNaN(sumTransfer) ? 0 : sumTransfer).toLocaleString();
+
+                document.getElementById("sales-history-rows").innerHTML = filtered.map(s => `
+                    <div class="flex justify-between items-center text-xs border-b border-white/5 pb-1">
+                        <div>
+                            <span class="font-bold text-orange-400">${s.tableName || 'N/A'}</span> 
+                            <span class="text-[10px] text-slate-400">(${s.timestamp ? new Date(s.timestamp).toLocaleTimeString('lo-LA') : ''})</span>
                         </div>
-                    `).join('');
-                }
+                        <div class="font-black">${Number(s.total || 0).toLocaleString()} ₭</div>
+                    </div>
+                `).join('');
+            };
+        }
+
+        function updateDailyRevenueBadge() {
+            let today = new Date().toDateString();
+            let tx = db.transaction(["sales"], "readonly");
+            tx.objectStore("sales").getAll().onsuccess = function(e) {
+                let sales = e.target.result || [];
+                let todayTotal = sales.filter(s => s && s.timestamp && new Date(s.timestamp).toDateString() === today)
+                                      .reduce((sum, s) => sum + Number(s.total || 0), 0);
+                
+                let safeTotal = isNaN(todayTotal) ? 0 : todayTotal;
+                document.getElementById("front-revenue-tag").innerText = `ຍອດມື້ນີ້: ${safeTotal.toLocaleString()} ກີບ`;
             };
         }
 
