@@ -3,957 +3,1068 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ລະບົບ POS ຮ້ານ ວຽງໄຊ ປີ້ງຍ່າງ</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome CDN -->
+    <title>ລະບົບຮ້ານອາຫານ - POS & Stock Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font (Noto Sans Lao) -->
+    <!-- Google Fonts (Noto Sans Lao) -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans Lao', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-800 antialiased selection:bg-orange-500 selection:text-white">
+<body class="bg-slate-950 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- VIEW: LOGIN -->
+    <!-- 1. LOGIN VIEW -->
     <div id="view-login" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 space-y-6 border border-slate-100">
             <div class="text-center space-y-2">
-                <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl mx-auto flex items-center justify-center text-2xl font-black shadow-lg shadow-orange-500/30">
-                    <i class="fa-solid fa-fire-burner"></i>
+                <div class="w-16 h-16 bg-orange-500 text-white rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-lg shadow-orange-500/30">
+                    <i class="fa-solid fa-utensils"></i>
                 </div>
-                <h1 class="font-black text-xl text-slate-900">ຮ້ານ ວຽງໄຊ ປີ້ງຍ່າງ</h1>
-                <p class="text-xs text-slate-400 font-medium">กรุณາเข้าสู่ระบบเพื่อใช้งาน POS</p>
+                <h2 class="text-xl font-black text-slate-800">ເຂົ້າສູ່ລະບົບ POS</h2>
+                <p class="text-xs text-slate-400 font-semibold">ລະບົບຈັດການຮ້ານອາຫານ ແລະ ສະຕ໋ອກ</p>
             </div>
-            
             <form onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block font-bold text-xs text-slate-600 mb-1">ຊື່ຜູ້ໃຊ້ (Username)</label>
-                    <input type="text" id="login-username" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-orange-500" placeholder="admin ຫຼື staff">
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ຊື່ຜູ້ໃຊ້ (Username)</label>
+                    <input type="text" id="login-username" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-orange-500 transition-all">
                 </div>
                 <div>
-                    <label class="block font-bold text-xs text-slate-600 mb-1">ລະຫັດຜ່ານ (Password)</label>
-                    <input type="password" id="login-password" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-orange-500" placeholder="1234">
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ລະຫັດຜ່ານ (Password)</label>
+                    <input type="password" id="login-password" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-orange-500 transition-all">
                 </div>
-                <p id="login-error" class="text-rose-500 text-xs font-bold text-center hidden">ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ!</p>
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl text-xs shadow-lg shadow-orange-500/20 transition-all">ເຂົ້າສູ່ລະບົບ</button>
+                <div id="login-error" class="hidden text-rose-500 text-xs font-bold text-center">ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ!</div>
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-orange-500/30 transition-all text-xs">ເຂົ້າສູ່ລະບົບ</button>
             </form>
-            <div class="text-center text-[10px] text-slate-400">
-                <span>Default: admin / 1234 ຫຼື staff / 1234</span>
-            </div>
         </div>
     </div>
 
-    <!-- VIEW: MAIN APP -->
-    <div id="view-app" class="hidden min-h-screen flex flex-col bg-slate-100">
+    <!-- 2. MAIN APP CONTAINER -->
+    <div id="view-app" class="hidden flex-1 flex flex-col bg-slate-100">
         <!-- TOP NAVBAR -->
-        <header class="bg-slate-900 text-white px-4 py-3 flex justify-between items-center shadow-md">
+        <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex justify-between items-center text-white sticky top-0 z-40">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 bg-orange-500 text-white rounded-xl flex items-center justify-center font-black">
-                    <i class="fa-solid fa-fire-burner text-sm"></i>
+                <div class="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center font-black shadow-md shadow-orange-500/30">
+                    <i class="fa-solid fa-utensils text-sm"></i>
                 </div>
                 <div>
-                    <h2 class="font-black text-xs leading-tight">ວຽງໄຊ ປີ້ງຍ່າງ POS</h2>
+                    <h1 class="font-black text-sm tracking-wide">VIENGXAI POS</h1>
                     <span id="front-revenue-tag" class="text-[10px] text-orange-400 font-bold">ຍອດມື້ນີ້: 0 ₭</span>
                 </div>
             </div>
 
-            <!-- NAVIGATION BUTTONS -->
-            <div class="flex items-center space-x-1.5 overflow-x-auto py-1">
+            <nav class="flex items-center space-x-1.5 overflow-x-auto py-1">
                 <button onclick="switchView('pos')" id="nav-pos" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-md shadow-orange-500/20 transition-all flex items-center space-x-1.5">
-                    <i class="fa-solid fa-cash-register"></i>
-                    <span>ຂາຍສິນຄ້າ (POS)</span>
+                    <i class="fa-solid fa-cash-register"></i><span>ຂາຍສິນຄ້າ (POS)</span>
+                </button>
+                <button onclick="switchView('stock')" id="nav-stock" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5">
+                    <i class="fa-solid fa-boxes-stacked"></i><span>ຈັດການສະຕ໋ອກ</span>
                 </button>
                 <button onclick="switchView('reports')" id="nav-reports" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5">
-                    <i class="fa-solid fa-chart-line"></i>
-                    <span>ລາຍງານການຂາຍ</span>
+                    <i class="fa-solid fa-chart-line"></i><span>ລາຍງານການຂາຍ</span>
                 </button>
                 <button onclick="switchView('debts')" id="nav-debts" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5">
-                    <i class="fa-solid fa-book-bookmark"></i>
-                    <span>ບັນຊີຄ້າງຊຳລະ</span>
+                    <i class="fa-solid fa-file-invoice-dollar"></i><span>ບັນຊີລູກໜີ້</span>
                 </button>
                 <button onclick="switchView('admin')" id="nav-admin" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>ຕັ້ງຄ່າລະບົບ</span>
+                    <i class="fa-solid fa-gear"></i><span>ຕັ້ງຄ່າລະບົບ</span>
                 </button>
-                <button onclick="openBackupModal()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5">
-                    <i class="fa-solid fa-database"></i>
-                    <span>Backup</span>
-                </button>
-            </div>
+            </nav>
 
-            <div class="flex items-center space-x-3">
-                <div id="user-badge" class="hidden md:flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold">
-                    <i class="fa-solid fa-user text-orange-400"></i>
+            <div class="flex items-center space-x-2">
+                <button onclick="openBackupModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all flex items-center space-x-1" title="สำรอง/กู้คืนข้อมูล">
+                    <i class="fa-solid fa-database text-xs"></i>
+                </button>
+                <div id="user-badge" class="hidden sm:flex items-center space-x-1.5 bg-slate-800 px-3 py-1.5 rounded-xl text-xs font-bold text-orange-400">
+                    <i class="fa-solid fa-user-shield"></i>
                     <span>ADMIN</span>
                 </div>
-                <button onclick="handleLogout()" class="w-9 h-9 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white rounded-xl flex items-center justify-center transition-all text-xs font-bold" title="ອອກຈາກລະບົບ">
+                <button onclick="handleLogout()" class="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-xs font-bold transition-all">
                     <i class="fa-solid fa-power-off"></i>
                 </button>
             </div>
         </header>
 
-        <!-- CONTENT VIEWS -->
-        <main class="flex-1 p-3">
-            <!-- 1. POS VIEW -->
-            <div id="view-pos" class="grid grid-cols-1 lg:grid-cols-12 gap-3 h-[calc(100vh-5rem)]">
-                <!-- LEFT & MIDDLE: TABLES & MENU -->
-                <div class="lg:col-span-7 flex flex-col space-y-3 h-full">
-                    <!-- Tables Section -->
-                    <div class="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-sm">
+        <!-- VIEWS CONTAINER -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            
+            <!-- VIEW: POS -->
+            <div id="view-pos" class="flex-1 flex flex-col lg:flex-row overflow-hidden p-3 gap-3">
+                <!-- LEFT: TABLES & MENU -->
+                <div class="flex-1 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-xs p-4 overflow-hidden">
+                    <!-- Tables Grid Bar -->
+                    <div class="mb-4">
                         <div class="flex justify-between items-center mb-2">
-                            <h3 class="font-black text-xs text-slate-800">ເລືອກໂຕະອາຫານ</h3>
-                            <span class="text-[10px] text-slate-400 font-semibold">ຄລິກໂຕະເພື່ອສັ່ງອາຫານ</span>
+                            <h3 class="font-black text-xs text-slate-800 uppercase tracking-wider">ເລືອກໂຕະອາຫານ</h3>
+                            <span class="text-[10px] text-slate-400 font-bold">ກົດເລືອກໂຕະກ່ອນສັ່ງອາຫານ</span>
                         </div>
-                        <div id="grid-tables" class="grid grid-cols-4 sm:grid-cols-8 gap-2 max-h-28 overflow-y-auto pr-1">
-                            <!-- Dynamic tables -->
+                        <div id="grid-tables" class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                            <!-- JS Render Tables -->
                         </div>
                     </div>
 
-                    <!-- Menu Section -->
-                    <div class="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-sm flex-1 flex flex-col">
-                        <div class="flex flex-col sm:flex-row justify-between items-center gap-2 mb-2">
+                    <hr class="border-slate-100 my-2">
+
+                    <!-- Menu Categories & Items -->
+                    <div class="flex-1 flex flex-col overflow-hidden mt-2">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
                             <div id="category-pills" class="flex items-center space-x-1.5 overflow-x-auto w-full pb-1">
-                                <!-- Dynamic categories -->
+                                <!-- JS Render Categories -->
                             </div>
-                            <div class="w-full sm:w-48 relative">
+                            <div class="w-full sm:w-48">
                                 <input type="text" id="input-search-menu" oninput="filterMenu()" placeholder="ຄົ້ນຫາເມນູ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-orange-500">
-                                <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-slate-400 text-xs"></i>
                             </div>
                         </div>
 
-                        <div id="grid-menu" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 overflow-y-auto flex-1 pr-1">
-                            <!-- Dynamic menu items -->
+                        <div id="grid-menu" class="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 pr-1">
+                            <!-- JS Render Menu -->
                         </div>
                     </div>
                 </div>
 
-                <!-- RIGHT: BASKET & BILLING -->
-                <div class="lg:col-span-5 bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between h-full">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-                            <div>
-                                <h3 id="text-current-table" class="font-black text-sm text-slate-800">ຍັງບໍ່ໄດ້ເລືອກໂຕະ</h3>
-                                <span class="text-[10px] text-slate-400 font-semibold">ລາຍການອາຫານໃນໂຕະ</span>
-                            </div>
-                            <div class="flex space-x-1">
-                                <button onclick="openTableActionModal()" id="btn-table-action" disabled class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold disabled:opacity-40 transition-all">ຍ້າຍ/ລວມໂຕະ</button>
-                                <button onclick="clearCurrentBasket()" class="px-2.5 py-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
+                <!-- RIGHT: CART & BILLING -->
+                <div class="w-full lg:w-96 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-xs p-4 overflow-hidden">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                        <div>
+                            <h3 id="text-current-table" class="font-black text-sm text-slate-800">ໂຕະອາຫານ: ຍັງບໍ່ໄດ້ເລືອກ</h3>
+                            <span class="text-[10px] text-slate-400 font-bold">ລາຍການອາຫານໃນໂຕະ</span>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="openTableActionModal()" id="btn-table-action" disabled class="px-2.5 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-xl text-[10px] font-black transition-all disabled:opacity-40">
+                                <i class="fa-solid fa-arrows-split-up-and-left"></i> ຍ້າຍ/ລວມໂຕະ
+                            </button>
+                            <button onclick="clearCurrentBasket()" class="p-1.5 text-slate-400 hover:text-rose-500 rounded-xl transition-all"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Cart Items Table -->
+                    <div class="flex-1 overflow-y-auto my-3 pr-1">
+                        <table class="w-full text-xs">
+                            <thead class="text-slate-400 border-b border-slate-100">
+                                <tr>
+                                    <th class="text-left pb-2 font-bold">ເມນູ</th>
+                                    <th class="text-center pb-2 font-bold">ຈຳນວນ</th>
+                                    <th class="text-right pb-2 font-bold">ລາຄາ</th>
+                                    <th class="text-center pb-2 font-bold">ລຶບ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-table-rows">
+                                <tr><td colspan="4" class="py-6 text-center text-xs text-slate-400 font-semibold">ຍັງບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Billing Calculations -->
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 space-y-2 text-xs">
+                        <div class="flex justify-between font-bold text-slate-600">
+                            <span>ລວມຍອດຍ່ອຍ:</span>
+                            <span id="text-subtotal-price">0 ₭</span>
+                        </div>
+                        <div class="flex justify-between items-center font-bold text-slate-600">
+                            <span class="flex items-center space-x-1">
+                                <span>ສ່ວນຫຼຸດ:</span>
+                                <select id="select-discount-type" onchange="liveCalcChange()" class="bg-white border border-slate-200 rounded-lg px-1 py-0.5 text-[10px] font-bold">
+                                    <option value="amount">₭</option>
+                                    <option value="percent">%</option>
+                                </select>
+                            </span>
+                            <input type="number" id="input-discount" value="0" oninput="liveCalcChange()" class="w-24 bg-white border border-slate-200 rounded-lg px-2 py-0.5 text-right font-bold text-xs">
+                        </div>
+                        <div class="flex justify-between font-black text-slate-900 text-sm pt-2 border-t border-slate-200">
+                            <span>ຍອດລວມທັງໝົດ:</span>
+                            <span id="text-total-price" class="text-orange-600">0 ₭</span>
                         </div>
 
-                        <!-- Basket Items Table -->
-                        <div class="max-h-40 overflow-y-auto pr-1">
+                        <!-- Payment inputs -->
+                        <div class="space-y-1.5 pt-2 border-t border-slate-200">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-600">ຮັບເງິນສົດ:</span>
+                                <input type="number" id="input-cash" placeholder="0" oninput="liveCalcChange()" class="w-28 bg-white border border-slate-200 rounded-lg px-2 py-1 text-right font-bold text-xs">
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-600">ໂອນເງິນ:</span>
+                                <input type="number" id="input-transfer" placeholder="0" oninput="liveCalcChange()" class="w-28 bg-white border border-slate-200 rounded-lg px-2 py-1 text-right font-bold text-xs">
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-slate-600">ຄ້າງຊຳລະ (ລູກໜີ້):</span>
+                                <input type="number" id="input-debt" placeholder="0" oninput="liveCalcChange()" class="w-28 bg-white border border-slate-200 rounded-lg px-2 py-1 text-right font-bold text-xs text-rose-600">
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-slate-200">
+                                <span class="font-bold text-slate-800">ເງິນທອນ:</span>
+                                <span id="text-change-price" class="font-black text-emerald-600 text-sm">0 ₭</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-3 gap-2 mt-3">
+                        <button onclick="fastSaveOrderToTable()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl transition-all text-center">ບັນທຶກໂຕະ</button>
+                        <button onclick="printPreBill()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition-all text-center">ພິມບິນກ່ອນ</button>
+                        <button onclick="fastProcessPayment()" class="bg-orange-500 hover:bg-orange-600 text-white font-black py-2.5 rounded-xl shadow-md shadow-orange-500/20 transition-all text-center">ຈ່າຍເງິນ</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: STOCK MANAGEMENT -->
+            <div id="view-stock" class="hidden flex-1 flex flex-col overflow-hidden p-4 max-w-7xl mx-auto w-full gap-4">
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <h2 class="font-black text-base text-slate-800">ຈັດການສະຕ໋ອກສິນຄ້າ / วัตถุดิบ</h2>
+                            <p class="text-xs text-slate-400 font-semibold">ເພີ່ມ, ລຶບ, ແລະ ຕັ້ງຄ່າຈຳນວນສະຕ໋ອກ (ເຊື່ອມຕໍ່ກັບເມນູອາຫານ)</p>
+                        </div>
+                        <div class="flex space-x-2 w-full sm:w-auto">
+                            <input type="text" id="stock-search" oninput="renderStockTable()" placeholder="ຄົ້ນຫາສະຕ໋ອກ..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold w-full sm:w-60 focus:outline-none focus:border-orange-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Add Form & List -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 overflow-hidden">
+                    <!-- Add/Edit Stock Form -->
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col space-y-4">
+                        <h3 class="font-black text-sm text-slate-800 border-b border-slate-100 pb-2">ເພີ່ມລາຍການສະຕ໋ອກໃໝ່</h3>
+                        <div class="space-y-3 text-xs flex-1">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">ຊື່ວັດຖຸດິບ / ສິນຄ້າ</label>
+                                <input type="text" id="st-name" placeholder="ເຊັ່ນ: ຊີ້ນງົວ, ເບຍລາວ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:border-orange-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">ຈຳນວນຄົງເຫຼືອ</label>
+                                    <input type="number" id="st-qty" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:border-orange-500">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">ຫົວໜ່ວຍ</label>
+                                    <input type="text" id="st-unit" placeholder="ຈານ, ຖາດ, ຂວດ, ກິໂລ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:border-orange-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">ຈຳນວນເຕືອນສະຕ໋ອກໃກ້ໝົດ (Minimum)</label>
+                                <input type="number" id="st-min" value="5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:border-orange-500">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">ຜູກກັບເມນູອາຫານ (ທີ່ໃຊ້ສະຕ໋ອກນີ້)</label>
+                                <select id="st-linked-menu" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:border-orange-500">
+                                    <option value="">-- ບໍ່ຜູກ (ເປັນວັດຖຸດິບລວມ) --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="addStockItem()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl shadow-md shadow-orange-500/20 transition-all text-xs">
+                            <i class="fa-solid fa-plus"></i> ບັນທຶກເພີ່ມສະຕ໋ອກ
+                        </button>
+                    </div>
+
+                    <!-- Stock Items Table List -->
+                    <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col overflow-hidden">
+                        <h3 class="font-black text-sm text-slate-800 border-b border-slate-100 pb-2 mb-3">ລາຍການສະຕ໋ອກທັງໝົດໃນລະບົບ</h3>
+                        <div class="flex-1 overflow-y-auto pr-1">
                             <table class="w-full text-xs">
-                                <thead>
-                                    <tr class="border-b border-slate-100 text-slate-400 text-[10px]">
-                                        <th class="py-1 text-left">ລາຍການ</th>
-                                        <th class="py-1 text-center">ຈຳນວນ</th>
-                                        <th class="py-1 text-right">ລວມ</th>
-                                        <th class="py-1 text-center">ຈັດການ</th>
+                                <thead class="text-slate-400 border-b border-slate-100 bg-slate-50">
+                                    <tr>
+                                        <th class="text-left p-2.5 font-bold">ຊື່ສິນຄ້າ / วัตถุดิบ</th>
+                                        <th class="text-center p-2.5 font-bold">ຈຳນວນຄົງເຫຼືອ</th>
+                                        <th class="text-center p-2.5 font-bold">ຫົວໜ່ວຍ</th>
+                                        <th class="text-center p-2.5 font-bold">ສະຖານະ</th>
+                                        <th class="text-right p-2.5 font-bold">ຈັດການ</th>
                                     </tr>
                                 </thead>
-                                <tbody id="cart-table-rows">
-                                    <tr><td colspan="4" class="py-6 text-center text-xs text-slate-400 font-semibold">ຍັງບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້</td></tr>
+                                <tbody id="stock-table-rows">
+                                    <!-- JS Render Stock -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Calculation & Payment Area -->
-                    <div class="space-y-3 pt-2 border-t border-slate-100">
-                        <div class="space-y-1.5 text-xs">
-                            <div class="flex justify-between text-slate-500 font-medium">
-                                <span>ລວມຍອດຍ່ອຍ:</span>
-                                <span id="text-subtotal-price" class="font-bold text-slate-800">0 ₭</span>
-                            </div>
-                            <div class="flex justify-between items-center text-slate-500 font-medium">
-                                <span>ສ່ວນຫຼຸດ:</span>
-                                <div class="flex items-center space-x-1 w-36">
-                                    <input type="number" id="input-discount" value="0" oninput="liveCalcChange()" class="w-20 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-right font-bold focus:outline-none focus:border-orange-500">
-                                    <select id="select-discount-type" onchange="liveCalcChange()" class="bg-slate-50 border border-slate-200 rounded-lg px-1 py-1 text-[10px] font-bold focus:outline-none">
-                                        <option value="kip">₭</option>
-                                        <option value="percent">%</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="flex justify-between text-slate-900 font-black text-sm pt-1 border-t border-slate-100">
-                                <span>ລວມທັງໝົດ:</span>
-                                <span id="text-total-price" class="text-orange-600">0 ₭</span>
-                            </div>
+            <!-- VIEW: REPORTS -->
+            <div id="view-reports" class="hidden flex-1 flex flex-col overflow-hidden p-4 max-w-7xl mx-auto w-full gap-4">
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <h2 class="font-black text-base text-slate-800">ລາຍງານຍອດຂາຍ</h2>
+                            <p class="text-xs text-slate-400 font-semibold">ກວດສອບລາຍຮັບ ແລະ ປະຫວັດການຂາຍຕາມວັນທີ</p>
                         </div>
+                        <div class="flex items-center space-x-2 w-full sm:w-auto">
+                            <input type="date" id="report-date-select" onchange="loadSalesReport()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
+                            <button onclick="exportDailyCSV()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-xl text-xs transition-all">Export CSV</button>
+                        </div>
+                    </div>
 
-                        <!-- Cash / Transfer Inputs -->
-                        <div class="grid grid-cols-3 gap-2 text-xs">
-                            <div>
-                                <label class="block font-semibold text-slate-500 mb-0.5 text-[10px]">ເງິນສົດ</label>
-                                <input type="number" id="input-cash" oninput="liveCalcChange()" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold focus:outline-none focus:border-orange-500">
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-500 mb-0.5 text-[10px]">ເງິນໂອນ</label>
-                                <input type="number" id="input-transfer" oninput="liveCalcChange()" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold focus:outline-none focus:border-orange-500">
-                            </div>
-                            <div>
-                                <label class="block font-semibold text-slate-500 mb-0.5 text-[10px]">ຄ້າງຊຳລະ</label>
-                                <input type="number" id="input-debt" oninput="liveCalcChange()" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold focus:outline-none focus:border-orange-500 text-rose-500">
-                            </div>
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+                        <div class="bg-orange-50 border border-orange-200 rounded-2xl p-3.5">
+                            <span class="text-[10px] font-bold text-orange-600">ຍອດຂາຍລວມ</span>
+                            <h3 id="text-revenue-sum" class="font-black text-lg text-orange-900 mt-1">0</h3>
                         </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5">
+                            <span class="text-[10px] font-bold text-slate-500">เงินสด</span>
+                            <h3 id="text-revenue-cash" class="font-black text-lg text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5">
+                            <span class="text-[10px] font-bold text-slate-500">เงินโอน</span>
+                            <h3 id="text-revenue-transfer" class="font-black text-lg text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-200 rounded-2xl p-3.5">
+                            <span class="text-[10px] font-bold text-rose-600">ค้างชำระ</span>
+                            <h3 id="text-revenue-debt" class="font-black text-lg text-rose-900 mt-1">0</h3>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="flex justify-between items-center text-xs bg-slate-50 px-3 py-2 rounded-xl">
-                            <span class="font-bold text-slate-500">ເງິນທອນ:</span>
-                            <span id="text-change-price" class="font-black text-emerald-600 text-sm">0 ₭</span>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-3 gap-2 pt-1">
-                            <button onclick="fastSaveOrderToTable()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition-all">ບັນທຶກໂຕະ</button>
-                            <button onclick="printPreBill()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition-all">ພິມໃບບິນ</button>
-                            <button onclick="fastProcessPayment()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md shadow-orange-500/20 transition-all">ຊຳລະເງິນ</button>
-                        </div>
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex-1 flex flex-col overflow-hidden">
+                    <h3 class="font-black text-sm text-slate-800 border-b border-slate-100 pb-2 mb-3">ປະຫວັດການຂາຍໃນວັນທີເລືອກ</h3>
+                    <div id="sales-history-rows" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+                        <!-- JS Render Sales History -->
                     </div>
                 </div>
             </div>
 
-            <!-- 2. REPORTS VIEW -->
-            <div id="view-reports" class="hidden space-y-3">
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col md:flex-row justify-between items-center gap-3">
-                    <div class="flex items-center space-x-3 w-full md:w-auto">
-                        <h3 class="font-black text-sm text-slate-800">ລາຍງານການຂາຍ</h3>
-                        <input type="date" id="report-date-select" onchange="loadSalesReport()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold focus:outline-none focus:border-orange-500">
-                    </div>
-                    <div class="flex items-center space-x-2 w-full md:w-auto">
-                        <button onclick="exportDailyCSV()" class="flex-1 md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center space-x-1.5">
-                            <i class="fa-solid fa-file-excel"></i>
-                            <span>Export ວັນນີ້ (CSV)</span>
-                        </button>
-                        <button onclick="exportMonthlyCSV()" class="flex-1 md:flex-none px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center space-x-1.5">
-                            <i class="fa-solid fa-file-excel"></i>
-                            <span>Export ປະຈຳເດືອນ (CSV)</span>
-                        </button>
+            <!-- VIEW: DEBTS -->
+            <div id="view-debts" class="hidden flex-1 flex flex-col overflow-hidden p-4 max-w-7xl mx-auto w-full gap-4">
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="font-black text-base text-slate-800">ບັນຊີລູກໜີ້ (ค้างชำระ)</h2>
+                            <p class="text-xs text-slate-400 font-semibold">ລາຍການບິນທີ່ຄ້າງຊຳລະເງິນ</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-rose-600">ຍອດໜີ້ລວມທັງໝົດ</span>
+                            <h3 id="text-total-debt-sum" class="font-black text-lg text-rose-700">0 ₭</h3>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-                        <span class="text-xs font-bold text-slate-400">ຍອດຂາຍລວມ</span>
-                        <h4 id="text-revenue-sum" class="text-xl font-black text-slate-900">0</h4>
-                        <span class="text-[10px] text-slate-400">กีບ (KIP)</span>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-                        <span class="text-xs font-bold text-slate-400">ເງິນສົດ</span>
-                        <h4 id="text-revenue-cash" class="text-xl font-black text-emerald-600">0</h4>
-                        <span class="text-[10px] text-slate-400">กีບ (KIP)</span>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-                        <span class="text-xs font-bold text-slate-400">ເງິນໂອນ</span>
-                        <h4 id="text-revenue-transfer" class="text-xl font-black text-sky-600">0</h4>
-                        <span class="text-[10px] text-slate-400">กีບ (KIP)</span>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
-                        <span class="text-xs font-bold text-slate-400">ຄ້າງຊຳລະ</span>
-                        <h4 id="text-revenue-debt" class="text-xl font-black text-rose-500">0</h4>
-                        <span class="text-[10px] text-slate-400">กีບ (KIP)</span>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
-                    <h4 class="font-black text-xs text-slate-800">ປະຫວັດບິນຂາຍ</h4>
-                    <div id="sales-history-rows" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
-                        <!-- Dynamic sales history -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex-1 flex flex-col overflow-hidden">
+                    <div id="debts-list-rows" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+                        <!-- JS Render Debts -->
                     </div>
                 </div>
             </div>
 
-            <!-- 3. DEBTS VIEW -->
-            <div id="view-debts" class="hidden space-y-3">
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex justify-between items-center">
-                    <h3 class="font-black text-sm text-slate-800">ລາຍການຄ້າງຊຳລະ (Debts Management)</h3>
-                    <div class="text-right">
-                        <span class="text-xs font-bold text-slate-400 block">ยอดค้างรวมทั้งหมด</span>
-                        <span id="text-total-debt-sum" class="text-base font-black text-rose-600">0 ₭</span>
+            <!-- VIEW: ADMIN SETTINGS -->
+            <div id="view-admin" class="hidden flex-1 flex flex-col overflow-hidden p-4 max-w-7xl mx-auto w-full gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Categories -->
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                        <h3 class="font-black text-sm text-slate-800 border-b border-slate-100 pb-2 mb-3">ຈັດການໝວດໝູ່ເມນູ</h3>
+                        <div class="flex space-x-2 mb-3">
+                            <input type="text" id="c-name" placeholder="ຊື່ໝວດໝູ່..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
+                            <button onclick="addCategory()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-2 rounded-xl text-xs">ເພີ່ມ</button>
+                        </div>
+                        <div id="admin-category-list" class="flex-1 overflow-y-auto space-y-2 max-h-48 pr-1"></div>
                     </div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
-                    <div id="debts-list-rows" class="space-y-2 max-h-[60vh] overflow-y-auto pr-1">
-                        <!-- Dynamic debts list -->
+
+                    <!-- Tables -->
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                        <h3 class="font-black text-sm text-slate-800 border-b border-slate-100 pb-2 mb-3">ຈັດການໂຕະອາຫານ</h3>
+                        <div class="flex space-x-2 mb-3">
+                            <input type="text" id="t-name" placeholder="ເຊັ່ນ: T-09" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
+                            <button onclick="addTable()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-3 py-2 rounded-xl text-xs">ເພີ່ມ</button>
+                        </div>
+                        <div id="admin-table-list" class="flex-1 overflow-y-auto space-y-2 max-h-48 pr-1"></div>
+                    </div>
+
+                    <!-- Menu Items -->
+                    <div class="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 flex flex-col">
+                        <h3 class="font-black text-sm text-slate-800 border-b border-slate-100 pb-2 mb-3">ເພີ່ມເມນູອາຫານ</h3>
+                        <div class="space-y-2 mb-3 text-xs">
+                            <input type="text" id="m-name" placeholder="ຊື່ເມນູອາຫານ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold">
+                            <input type="number" id="m-price" placeholder="ລາຄາ (₭)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold">
+                            <select id="m-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold"></select>
+                            <button onclick="addMenu()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl">ເພີ່ມເມນູ</button>
+                        </div>
+                        <div id="admin-menu-list" class="flex-1 overflow-y-auto space-y-2 max-h-36 pr-1"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. ADMIN VIEW -->
-            <div id="view-admin" class="hidden grid grid-cols-1 md:grid-cols-3 gap-3">
-                <!-- Manage Categories -->
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
-                    <h3 class="font-black text-xs text-slate-800">ຈັດການໝວດໝູ່ອາຫານ</h3>
-                    <div class="flex space-x-2">
-                        <input type="text" id="c-name" placeholder="ຊື່ໝວດໝູ່ໃໝ່" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-orange-500">
-                        <button onclick="addCategory()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all">ເພີ່ມ</button>
-                    </div>
-                    <div id="admin-category-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-                </div>
-
-                <!-- Manage Tables -->
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3">
-                    <h3 class="font-black text-xs text-slate-800">ຈັດການໂຕະອາຫານ</h3>
-                    <div class="flex space-x-2">
-                        <input type="text" id="t-name" placeholder="ຊື່ໂຕະ (ເຊັ່ນ: T-09)" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-orange-500">
-                        <button onclick="addTable()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all">ເພີ່ມ</button>
-                    </div>
-                    <div id="admin-table-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-                </div>
-
-                <!-- Manage Menu -->
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm space-y-3 md:col-span-1">
-                    <h3 class="font-black text-xs text-slate-800">ເພີ່ມເມນູອາຫານ</h3>
-                    <div class="space-y-2 text-xs">
-                        <input type="text" id="m-name" placeholder="ຊື່ເມນູອາຫານ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-orange-500">
-                        <input type="number" id="m-price" placeholder="ລາຄາ (₭)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-orange-500">
-                        <select id="m-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-orange-500">
-                            <!-- Dynamic options -->
-                        </select>
-                        <button onclick="addMenu()" class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-xl font-bold shadow-md transition-all">ບັນທຶກເມນູ</button>
-                    </div>
-                    <div id="admin-menu-list" class="space-y-2 max-h-40 overflow-y-auto pr-1 pt-2"></div>
-                </div>
-            </div>
         </main>
     </div>
 
-    <!-- MODAL: RECEIPT & PRE-BILL (UPDATED WITH QR CODE & LOGO) -->
+    <!-- MODAL: RECEIPT BILL -->
     <div id="receiptModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 id="r-title" class="font-black text-sm text-slate-800">ໃບເສร็จຮັບเงิน / RECEIPT</h3>
-                <button onclick="closeReceiptModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <div class="text-center border-b border-dashed border-slate-200 pb-3 space-y-1">
+                <h3 id="r-title" class="font-black text-base text-slate-900">ໃບເສร็จຮັບເງິນ / RECEIPT</h3>
+                <p id="r-status-tag" class="text-xs font-bold text-orange-600">ໂຕະ: T-01</p>
+                <p id="r-meta" class="text-[10px] text-slate-400 font-semibold">ວັນທີ: 01/01/2026 12:00:00</p>
             </div>
 
-            <!-- Receipt Content (Scrollable for print style) -->
-            <div class="space-y-3 text-xs max-h-[60vh] overflow-y-auto pr-1" id="printable-receipt-area">
-                <div class="text-center space-y-1">
-                    <h2 class="font-black text-base text-slate-900">ຮ້ານ ວຽງໄຊ ປີ້ງຍ່າງ</h2>
-                    <p class="text-[10px] text-slate-500">ໂທ: 020 XXXXXXXX | ວຽງຈັນ, ລາວ</p>
-                    <div id="r-status-tag" class="inline-block px-2.5 py-0.5 bg-orange-100 text-orange-700 font-bold rounded-full text-[10px] mt-1">ໂຕະ: T-01</div>
-                    <p id="r-meta" class="text-[10px] text-slate-400 pt-0.5">ວັນທີ: 08/08/2026 11:32:20</p>
-                </div>
-
-                <table class="w-full text-xs border-y border-dashed border-slate-200 my-2">
-                    <thead>
-                        <tr class="border-b border-dashed border-slate-200 text-slate-400 text-[10px]">
-                            <th class="py-1.5 text-left">ລາຍການ</th>
-                            <th class="py-1.5 text-center">ຈຳນວນ</th>
-                            <th class="py-1.5 text-right">ລວມ</th>
+            <div class="max-h-60 overflow-y-auto pr-1">
+                <table class="w-full text-xs">
+                    <thead class="border-b border-slate-100 text-slate-400">
+                        <tr>
+                            <th class="text-left pb-1.5 font-bold">ລາຍການ</th>
+                            <th class="text-center pb-1.5 font-bold">ຈຳນວນ</th>
+                            <th class="text-right pb-1.5 font-bold">ລາຄາ</th>
                         </tr>
                     </thead>
-                    <tbody id="r-items" class="divide-y divide-dashed divide-slate-100">
-                        <!-- Dynamic items -->
-                    </tbody>
+                    <tbody id="r-items" class="divide-y divide-slate-50"></tbody>
                 </table>
+            </div>
 
-                <div class="space-y-1 text-xs pt-1 border-t border-dashed border-slate-200">
-                    <div class="flex justify-between text-slate-500">
-                        <span>ລວມຍອດຍ່ອຍ:</span>
-                        <span id="r-subtotal" class="font-bold text-slate-700">0 ₭</span>
-                    </div>
-                    <div class="flex justify-between text-slate-500">
-                        <span>ສ່ວນຫຼຸດ:</span>
-                        <span id="r-discount" class="font-bold text-slate-700">0 ₭</span>
-                    </div>
-                    <div class="flex justify-between text-slate-900 font-black text-sm pt-1 border-t border-slate-100">
-                        <span>ລວມທັງໝົດ:</span>
-                        <span id="r-total" class="text-orange-600">0 ₭</span>
-                    </div>
-                    <div class="flex justify-between text-slate-500 pt-1">
-                        <span>ຮັບເງິນສົດ:</span>
-                        <span id="r-cash" class="font-bold">0 ₭</span>
-                    </div>
-                    <div class="flex justify-between text-slate-500">
-                        <span>ເງິນໂອນ:</span>
-                        <span id="r-transfer" class="font-bold">0 ₭</span>
-                    </div>
-                    <div class="flex justify-between text-slate-500">
-                        <span>ຄ້າງຊຳລະ:</span>
-                        <span id="r-debt" class="font-bold text-rose-500">0 ₭</span>
-                    </div>
-                    <div class="flex justify-between text-slate-500 pb-1">
-                        <span>ເງິນທອນ:</span>
-                        <span id="r-change" class="font-bold text-emerald-600">0 ₭</span>
-                    </div>
-                </div>
-
-                <!-- QR Code & Thank You Message ທ້າຍບິນ -->
-                <div class="pt-3 border-t border-dashed border-slate-200 text-center space-y-2">
-                    <div class="flex justify-center">
-                        <img src="https://i.ibb.co/ycwXcb9r/Screenshot-2026-08-08-110239.png" alt="Payment QR Code" class="w-32 h-32 mx-auto border p-1 rounded-xl shadow-sm">
-                    </div>
-                    <p class="text-[10px] font-bold text-slate-600">ສະແກນຈ່າຍເງິນຜ່ານ QR Code</p>
-                    <p class="text-[10px] text-slate-400 font-medium pt-1">🙏 ຂອບໃຈທີ່ໃຊ້ບໍລິການ! ໂອກາດໜ້າເຊີນໃຫມ່ 🙏</p>
-                </div>
+            <div class="border-t border-dashed border-slate-200 pt-3 space-y-1 text-xs">
+                <div class="flex justify-between font-bold text-slate-600"><span>ລວມຍອດຍ່ອຍ:</span><span id="r-subtotal">0 ₭</span></div>
+                <div class="flex justify-between font-bold text-slate-600"><span>ສ່ວນຫຼຸດ:</span><span id="r-discount">0 ₭</span></div>
+                <div class="flex justify-between font-black text-slate-900 text-sm pt-1 border-t border-slate-100"><span>ຍອດລວມທັງໝົດ:</span><span id="r-total" class="text-orange-600">0 ₭</span></div>
+                <div class="flex justify-between font-bold text-slate-500 pt-1"><span>ຮັບເງິນສົດ:</span><span id="r-cash">0 ₭</span></div>
+                <div class="flex justify-between font-bold text-slate-500"><span>ໂອນເງິນ:</span><span id="r-transfer">0 ₭</span></div>
+                <div class="flex justify-between font-bold text-rose-500"><span>ຄ້າງຊຳລະ:</span><span id="r-debt">0 ₭</span></div>
+                <div class="flex justify-between font-bold text-emerald-600 pt-1 border-t border-slate-100"><span>ເງິນທອນ:</span><span id="r-change">0 ₭</span></div>
             </div>
 
             <div class="flex space-x-2 pt-2">
-                <button onclick="window.print()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-print"></i>
-                    <span>ພິມໃບບິນ</span>
-                </button>
-                <button onclick="closeReceiptModal()" class="px-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-xs transition-all">ປິດ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: MOVE/MERGE TABLE -->
-    <div id="tableActionModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-black text-sm text-slate-800">ຈັດການໂຕະ: <span id="text-action-src-table" class="text-orange-600"></span></h3>
-                <button onclick="closeTableActionModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                <button onclick="toggleTableActionTab('move')" id="btn-tab-move" class="py-2.5 text-center font-bold text-xs rounded-xl bg-orange-500 text-white shadow-md">ຍ້າຍໂຕະ</button>
-                <button onclick="toggleTableActionTab('merge')" id="btn-tab-merge" class="py-2.5 text-center font-bold text-xs rounded-xl text-slate-600 hover:bg-slate-200">ລວມໂຕະ</button>
-            </div>
-
-            <div class="space-y-2">
-                <label class="block font-bold text-xs text-slate-600">ເລືອກໂຕະປາຍທາງ</label>
-                <div id="grid-action-target-tables" class="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-                    <!-- Dynamic target tables -->
-                </div>
-            </div>
-
-            <div class="flex space-x-2 pt-2">
-                <button onclick="executeTableAction()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all">ຢືນຢັນດຳເນີນການ</button>
-                <button onclick="closeTableActionModal()" class="px-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-xs transition-all">ຍົກເລີກ</button>
+                <button onclick="window.print()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs transition-all"><i class="fa-solid fa-print"></i> ພິມບິນ</button>
+                <button onclick="closeReceiptModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2.5 rounded-xl text-xs transition-all">ປິດ</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: EDIT BILL -->
     <div id="editBillModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4 border border-slate-100">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-black text-sm text-slate-800">ແກ້ໄຂບິນຂາຍ: <span id="edit-bill-id" class="text-orange-600"></span></h3>
+                <h3 class="font-black text-sm text-slate-800">ແກ້ໄຂບິນ: <span id="edit-bill-id" class="text-orange-500"></span></h3>
                 <button onclick="closeEditBillModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-
-            <div class="space-y-3 max-h-60 overflow-y-auto" id="edit-bill-items-container">
-                <!-- Dynamic items for editing -->
+            
+            <div class="max-h-60 overflow-y-auto pr-1 space-y-2">
+                <table class="w-full text-xs">
+                    <thead class="border-b border-slate-100 text-slate-400">
+                        <tr>
+                            <th class="text-left pb-1 font-bold">ລາຍການ</th>
+                            <th class="text-center pb-1 font-bold">ຈຳນວນ</th>
+                            <th class="text-right pb-1 font-bold">ລາຄາລວມ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="edit-bill-items-rows" class="divide-y divide-slate-50"></tbody>
+                </table>
             </div>
 
-            <div class="grid grid-cols-3 gap-3 pt-2 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-500 mb-1">ເງິນສົດ</label>
-                    <input type="number" id="edit-bill-cash" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-orange-500">
+            <div class="bg-slate-50 p-3 rounded-2xl space-y-2 text-xs">
+                <div class="flex justify-between font-bold text-slate-600">
+                    <span>ຍອດລວມໃໝ່:</span>
+                    <span id="edit-bill-total" class="font-black text-orange-600">0 ₭</span>
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-500 mb-1">ເງິນໂອນ</label>
-                    <input type="number" id="edit-bill-transfer" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-orange-500">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-0.5">ເງິນສົດ</label>
+                        <input type="number" id="edit-bill-cash" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-0.5">ໂອນເງິນ</label>
+                        <input type="number" id="edit-bill-transfer" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold">
+                    </div>
                 </div>
-                <div>
-                    <label class="block font-semibold text-slate-500 mb-1">ຄ້າງຊຳລະ</label>
-                    <input type="number" id="edit-bill-debt" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold focus:outline-none focus:border-orange-500">
-                </div>
-            </div>
-
-            <div>
-                <label class="block font-semibold text-slate-500 mb-1 text-xs">ສະຖານະການຊຳລະ</label>
-                <select id="edit-bill-status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:border-orange-500">
-                    <option value="PAID">ຊຳລະແລ້ວ (PAID)</option>
-                    <option value="DEBT">ຄ້າງຊຳລະ (DEBT)</option>
-                </select>
             </div>
 
             <div class="flex space-x-2 pt-2">
-                <button onclick="saveEditedBill()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all">ບັນທຶກການແກ້ໄຂ</button>
-                <button onclick="closeEditBillModal()" class="px-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-xs transition-all">ຍົກເລີກ</button>
+                <button onclick="saveEditedBill()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all">ບັນທຶກການແກ້ໄຂ</button>
+                <button onclick="closeEditBillModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2.5 rounded-xl text-xs transition-all">ຍົກເລີກ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TABLE ACTIONS (MOVE / MERGE) -->
+    <div id="tableActionModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="font-black text-sm text-slate-800">ຈັດການໂຕະ: <span id="text-action-src-table" class="text-orange-500">T-01</span></h3>
+                <button onclick="closeTableActionModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="toggleTableActionTab('move')" id="btn-tab-move" class="py-2.5 text-center font-bold text-xs rounded-xl bg-orange-500 text-white shadow-md">ຍ້າຍໂຕະ</button>
+                <button onclick="toggleTableActionTab('merge')" id="btn-tab-merge" class="py-2.5 text-center font-bold text-xs rounded-xl bg-slate-100 text-slate-600">ລວມໂຕະ</button>
+            </div>
+
+            <div class="space-y-3 pt-2 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1" id="label-target-table">ເລືອກໂຕະປາຍທາງ (Target Table)</label>
+                    <select id="select-target-table" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 font-bold focus:outline-none focus:border-orange-500">
+                        <!-- Render options -->
+                    </select>
+                </div>
+                <button onclick="executeTableAction()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all shadow-md">ຢືນຢັນການດຳເນີນການ</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL: BACKUP & RESTORE -->
     <div id="backupModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-100">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 space-y-4 border border-slate-100">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="font-black text-sm text-slate-800">ສຳຮອງ ແລະ ກູ້ຄືນຂໍ້ມູນ (Backup & Restore)</h3>
+                <h3 class="font-black text-sm text-slate-800"><i class="fa-solid fa-database text-orange-500"></i> สำรอง / กู้คืนข้อมูล</h3>
                 <button onclick="closeBackupModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-
             <div class="space-y-3 text-xs">
-                <p class="text-slate-500 leading-relaxed">ທ່ານສາມາດສົ່ງອອກຂໍ້ມູນທັງໝົດໃນລະບົບ (ເມນູ, ໂຕະ, ປະຫວັດການຂາຍ ແລະ ບັນຊີ) ເກັບໄວ້ເປັນໄຟລ໌ JSON ຫຼື ນຳເຂົ້າຂໍ້ມູນເກົ່າກັບຄືນມາໄດ້.</p>
-                <button onclick="downloadBackupJSON()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-download"></i>
-                    <span>ດາວໂຫຼດໄຟລ໌ສຳຮອງຂໍ້ມູນ (Export JSON)</span>
-                </button>
-                <div class="pt-2 border-t border-slate-100">
-                    <label class="block font-bold text-slate-600 mb-1.5">ນຳເຂົ້າຂໍ້ມູນ (Restore JSON)</label>
-                    <input type="file" id="restore-file-input" accept=".json" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 transition-all">
+                <button onclick="exportJSONData()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all">ດາວໂຫຼດຂໍ້ມູນ (Backup JSON)</button>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">ນຳເຂົ້າຂໍ້ມູນ (Restore JSON)</label>
+                    <input type="file" id="import-file" accept=".json" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold">
                 </div>
-            </div>
-
-            <div class="flex space-x-2 pt-2">
-                <button onclick="processRestoreJSON()" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl text-xs shadow-md transition-all">ກູ້ຄືນຂໍ້ມູນ</button>
-                <button onclick="closeBackupModal()" class="px-5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl text-xs transition-all">ປິດ</button>
+                <button onclick="importJSONData()" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-all">ອັບໂຫລດ/ກູ້ຄືນຂໍ້ມູນ</button>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT SYSTEM LOGIC -->
     <script>
-        const DEFAULT_CATEGORIES = [
-            { id: 'c1', name: 'ທັງໝົດ' },
-            { id: 'c2', name: 'ຊີ້ນປิ้ง' },
-            { id: 'c3', name: 'ຈຸ່ມ/ໝໍ້ໄຟ' },
-            { id: 'c4', name: 'ຍຳ/ສຳ' },
-            { id: 'c5', name: 'ເຄື່ອງດື່ມ' }
-        ];
-
-        const DEFAULT_TABLES = [
-            { id: 'T-01', name: 'T-01', status: 'empty' },
-            { id: 'T-02', name: 'T-02', status: 'empty' },
-            { id: 'T-03', name: 'T-03', status: 'empty' },
-            { id: 'T-04', name: 'T-04', status: 'empty' },
-            { id: 'T-05', name: 'T-05', status: 'empty' },
-            { id: 'T-06', name: 'T-06', status: 'empty' },
-            { id: 'T-07', name: 'T-07', status: 'empty' },
-            { id: 'T-08', name: 'T-08', status: 'empty' }
-        ];
-
-        const DEFAULT_MENU = [
-            { id: 'm1', name: 'ຊີ້ນ 3 ຊັ້ນປັ້ງ', price: 50000, type: 'ຊີ້ນປັ້ງ' },
-            { id: 'm2', name: 'ສັນຄໍໝູປັ້ງ', price: 60000, type: 'ຊີ້ນປັ້ງ' },
-            { id: 'm3', name: 'ຊຸດຈຸ່ມລວມໃຫຍ່', price: 120000, type: 'ຈຸ່ມ/ໝໍ້ໄຟ' },
-            { id: 'm4', name: 'ຍຳກຸ້ງສົດ', price: 70000, type: 'ຍຳ/ສຳ' },
-            { id: 'm5', name: 'ຕຳໝຸ່ງປາແດກ', price: 30000, type: 'ຍຳ/ສຳ' },
-            { id: 'm6', name: 'ເບຍລາວ (ຂວດ)', price: 25000, type: 'ເຄື່ອງດື່ມ' },
-            { id: 'm7', name: 'ນ້ຳດື່ມຂວດໃຫຍ່', price: 10000, type: 'ເຄື່ອງດື່ມ' }
-        ];
-
-        let categories = JSON.parse(localStorage.getItem('viengxay_categories')) || DEFAULT_CATEGORIES;
-        let tables = JSON.parse(localStorage.getItem('viengxay_tables')) || DEFAULT_TABLES;
-        let menu = JSON.parse(localStorage.getItem('viengxay_menu')) || DEFAULT_MENU;
-        let orders = JSON.parse(localStorage.getItem('viengxay_orders')) || {};
-        let salesHistory = JSON.parse(localStorage.getItem('viengxay_sales')) || [];
-        
-        let currentTable = null;
-        let currentCategory = 'ທັງໝົດ';
-        let currentLoggedInUser = null;
-        let tableActionType = 'move';
-        let selectedTargetTable = null;
-        let activeEditingBillId = null;
-
-        window.onload = function() {
-            let sessionUser = sessionStorage.getItem('viengxay_user');
-            if(sessionUser) {
-                currentLoggedInUser = sessionUser;
-                document.getElementById('view-login').classList.add('hidden');
-                document.getElementById('view-app').classList.remove('hidden');
-                document.getElementById('user-badge').querySelector('span').innerText = sessionUser.toUpperCase();
-                initializeAppUI();
-            }
+        // --- MOCK DATABASE & STATE ---
+        let db = {
+            users: [
+                { username: "admin", password: "123", role: "ADMIN" },
+                { username: "staff", password: "123", role: "STAFF" }
+            ],
+            categories: ["ອາຫານລາວ", "ຕຳ/ຍຳ", "ແກງ/ຕົ້ມ", "ເຄື່ອງດື່ມ"],
+            tables: ["T-01", "T-02", "T-03", "T-04", "T-05", "T-06", "T-07", "T-08"],
+            menu: [
+                { id: 1, name: "ລາບໝູ", price: 50000, type: "ອາຫານລາວ" },
+                { id: 2, name: "ຕຳປາູປາລາ", price: 30000, type: "ຕຳ/ຍຳ" },
+                { id: 3, name: "ຕົ້ມສຳັບໝູ", price: 60000, type: "ແກງ/ຕົ້ມ" },
+                { id: 4, name: "ເບຍລາວ (ໃຫຍ່)", price: 25000, type: "ເຄື່ອງດື່ມ" }
+            ],
+            stock: [
+                { id: 1, name: "ຊີ້ນໝູ", qty: 20, unit: "ກິໂລ", min: 5, linkedMenuId: 1 },
+                { id: 2, name: "ເບຍລາວ", qty: 50, unit: "ຂວດ", min: 10, linkedMenuId: 4 }
+            ],
+            tableOrders: {}, 
+            salesHistory: [], 
+            debts: [] 
         };
 
+        let currentUser = null;
+        let currentTable = null;
+        let currentCategory = "ທັງໝົດ";
+        let currentBasket = []; 
+        let tableActionType = 'move';
+        let currentEditingId = null;
+
+        // --- AUTHENTICATION ---
         function handleLogin(e) {
             e.preventDefault();
-            let u = document.getElementById('login-username').value.trim();
-            let p = document.getElementById('login-password').value.trim();
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            const err = document.getElementById('login-error');
 
-            if((u === 'admin' && p === '1234') || (u === 'staff' && p === '1234') || (u === '1' && p === '1')) {
-                currentLoggedInUser = u;
-                sessionStorage.setItem('viengxay_user', u);
+            const found = db.users.find(x => x.username === u && x.password === p);
+            if (found) {
+                currentUser = found;
+                err.classList.add('hidden');
                 document.getElementById('view-login').classList.add('hidden');
                 document.getElementById('view-app').classList.remove('hidden');
-                document.getElementById('user-badge').querySelector('span').innerText = u.toUpperCase();
-                initializeAppUI();
+                initApp();
             } else {
-                document.getElementById('login-error').classList.remove('hidden');
+                err.classList.remove('hidden');
             }
         }
 
         function handleLogout() {
-            sessionStorage.removeItem('viengxay_user');
-            window.location.reload();
+            currentUser = null;
+            currentTable = null;
+            currentBasket = [];
+            document.getElementById('view-app').classList.add('hidden');
+            document.getElementById('view-login').classList.remove('hidden');
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
         }
 
-        function initializeAppUI() {
-            renderTablesGrid();
+        // --- INIT APP ---
+        function initApp() {
+            renderTables();
             renderCategories();
-            renderMenuGrid();
-            updateFrontRevenueTag();
+            renderMenu();
+            renderAdminLists();
+            renderStockTable();
+            updateDailyRevenueTag();
             
-            let todayStr = new Date().toISOString().split('T')[0];
-            let repDateInput = document.getElementById('report-date-select');
-            if(repDateInput) repDateInput.value = todayStr;
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('report-date-select').value = todayStr;
+            loadSalesReport();
         }
 
-        function saveDataToStorage() {
-            localStorage.setItem('viengxay_categories', JSON.stringify(categories));
-            localStorage.setItem('viengxay_tables', JSON.stringify(tables));
-            localStorage.setItem('viengxay_menu', JSON.stringify(menu));
-            localStorage.setItem('viengxay_orders', JSON.stringify(orders));
-            localStorage.setItem('viengxay_sales', JSON.stringify(salesHistory));
-        }
-
+        // --- NAVIGATION ---
         function switchView(viewName) {
-            ['pos', 'reports', 'debts', 'admin'].forEach(v => {
-                document.getElementById('view-' + v).classList.add('hidden');
-                document.getElementById('nav-' + v).className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5";
+            ['pos', 'stock', 'reports', 'debts', 'admin'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                const btn = document.getElementById(`nav-${v}`);
+                if (btn) {
+                    btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5";
+                }
             });
-            document.getElementById('view-' + viewName).classList.remove('hidden');
-            document.getElementById('nav-' + viewName).className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-md shadow-orange-500/20 transition-all flex items-center space-x-1.5";
 
-            if(viewName === 'reports') loadSalesReport();
-            if(viewName === 'debts') loadDebtsReport();
-            if(viewName === 'admin') loadAdminPanel();
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${viewName}`);
+            if (activeBtn) {
+                activeBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-md shadow-orange-500/20 transition-all flex items-center space-x-1.5";
+            }
+
+            if (viewName === 'debts') renderDebtsList();
+            if (viewName === 'reports') loadSalesReport();
         }
 
-        function renderTablesGrid() {
-            let container = document.getElementById('grid-tables');
-            container.innerHTML = '';
-            tables.forEach(t => {
-                let hasOrder = orders[t.id] && orders[t.id].length > 0;
-                let isSelected = currentTable === t.id;
-                
-                let bgClass = "bg-white border-slate-200 text-slate-700 hover:border-orange-500";
-                if(hasOrder) bgClass = "bg-orange-50 border-orange-300 text-orange-700 font-black shadow-sm";
-                if(isSelected) bgClass = "bg-orange-500 border-orange-600 text-white font-black shadow-md shadow-orange-500/30";
+        // --- RENDER TABLES ---
+        function renderTables() {
+            const grid = document.getElementById('grid-tables');
+            grid.innerHTML = '';
 
-                let btn = document.createElement('button');
-                btn.className = `p-2.5 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-1 ${bgClass}`;
-                btn.onclick = () => selectTable(t.id);
+            db.tables.forEach(t => {
+                const hasOrder = db.tableOrders[t] && db.tableOrders[t].items && db.tableOrders[t].items.length > 0;
+                const isSelected = currentTable === t;
+
+                let bgClass = "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100";
+                if (hasOrder) bgClass = "bg-orange-50 border-orange-200 text-orange-700";
+                if (isSelected) bgClass = "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/30";
+
+                const btn = document.createElement('button');
+                btn.className = `p-2 rounded-xl border text-xs font-black transition-all flex flex-col items-center justify-center space-y-0.5 ${bgClass}`;
                 btn.innerHTML = `
                     <i class="fa-solid fa-chair text-xs"></i>
-                    <span>${t.name}</span>
-                    ${hasOrder ? '<span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>' : ''}
+                    <span>${t}</span>
+                    <span class="text-[8px] font-semibold opacity-80">${hasOrder ? 'ມີອໍເດີ້' : 'ຫວ່າງ'}</span>
                 `;
-                container.appendChild(btn);
+                btn.onclick = () => selectTable(t);
+                grid.appendChild(btn);
             });
         }
 
-        function selectTable(tableId) {
-            currentTable = tableId;
-            document.getElementById('text-current-table').innerText = `ໂຕະ: ${tableId}`;
-            document.getElementById('btn-table-action').disabled = false;
-            renderTablesGrid();
-            renderBasketItems();
+        function selectTable(tableName) {
+            currentTable = tableName;
+            document.getElementById('text-current-table').innerText = `ໂຕະອາຫານ: ${tableName}`;
+            document.getElementById('btn-table-action').removeAttribute('disabled');
+
+            if (db.tableOrders[tableName]) {
+                currentBasket = JSON.parse(JSON.stringify(db.tableOrders[tableName].items));
+                document.getElementById('input-discount').value = db.tableOrders[tableName].discount || 0;
+                document.getElementById('select-discount-type').value = db.tableOrders[tableName].discountType || 'amount';
+            } else {
+                currentBasket = [];
+                document.getElementById('input-discount').value = 0;
+            }
+
+            renderTables();
+            renderCart();
+            liveCalcChange();
         }
 
+        // --- RENDER MENU & CATEGORIES ---
         function renderCategories() {
-            let container = document.getElementById('category-pills');
-            container.innerHTML = '';
-            categories.forEach(c => {
-                let active = currentCategory === c.name;
-                let btn = document.createElement('button');
-                btn.className = `px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${active ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
-                btn.onclick = () => { currentCategory = c.name; renderCategories(); renderMenuGrid(); };
-                btn.innerText = c.name;
-                container.appendChild(btn);
+            const pillContainer = document.getElementById('category-pills');
+            pillContainer.innerHTML = '';
+
+            const allCats = ["ທັງໝົດ", ...db.categories];
+            allCats.forEach(cat => {
+                const isActive = currentCategory === cat;
+                const btn = document.createElement('button');
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${isActive ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    currentCategory = cat;
+                    renderCategories();
+                    renderMenu();
+                };
+                pillContainer.appendChild(btn);
             });
         }
 
-        function renderMenuGrid() {
-            let container = document.getElementById('grid-menu');
-            let query = document.getElementById('input-search-menu').value.toLowerCase();
-            container.innerHTML = '';
+        function renderMenu() {
+            const grid = document.getElementById('grid-menu');
+            grid.innerHTML = '';
+            const keyword = document.getElementById('input-search-menu').value.toLowerCase();
 
-            let filtered = menu.filter(m => {
-                let matchCat = currentCategory === 'ທັງໝົດ' || m.type === currentCategory;
-                let matchQuery = m.name.toLowerCase().includes(query);
-                return matchCat && matchQuery;
+            const filtered = db.menu.filter(m => {
+                const matchCat = (currentCategory === "ທັງໝົດ" || m.type === currentCategory);
+                const matchKey = m.name.toLowerCase().includes(keyword);
+                return matchCat && matchKey;
             });
 
-            if(filtered.length === 0) {
-                container.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-slate-400 font-semibold">ບໍ່ພົບລາຍການເມນູອາຫານ</div>';
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400 font-semibold">ບໍ່ພົບເມນູອາຫານ</div>`;
                 return;
             }
 
             filtered.forEach(m => {
-                let card = document.createElement('div');
-                card.className = "bg-white border border-slate-200/80 rounded-2xl p-3.5 hover:border-orange-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-2";
-                card.onclick = () => addMenuItemToBasket(m);
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200/80 hover:border-orange-500 hover:shadow-sm rounded-2xl p-3 flex flex-col justify-between cursor-pointer transition-all";
                 card.innerHTML = `
                     <div>
-                        <span class="text-[10px] text-orange-500 font-bold block mb-0.5">${m.type}</span>
-                        <h4 class="font-bold text-xs text-slate-800 line-clamp-2">${m.name}</h4>
+                        <span class="text-[9px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md">${m.type}</span>
+                        <h4 class="font-black text-xs text-slate-800 mt-1.5">${m.name}</h4>
                     </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-100">
-                        <span class="font-black text-xs text-slate-900">${m.price.toLocaleString()} ₭</span>
-                        <div class="w-7 h-7 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center text-xs font-bold">
-                            <i class="fa-solid fa-plus text-[10px]"></i>
-                        </div>
+                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-200/60">
+                        <span class="font-black text-xs text-orange-600">${m.price.toLocaleString()} ₭</span>
+                        <div class="w-6 h-6 bg-orange-500 text-white rounded-lg flex items-center justify-center text-xs"><i class="fa-solid fa-plus"></i></div>
                     </div>
                 `;
-                container.appendChild(card);
+                card.onclick = () => addToCart(m);
+                grid.appendChild(card);
             });
         }
 
         function filterMenu() {
-            renderMenuGrid();
+            renderMenu();
         }
 
-        function addMenuItemToBasket(menuItem) {
-            if(!currentTable) {
-                alert('ກະລຸນາເລືອກໂຕະອາຫານກ່ອນເພີ່ມລາຍການ!');
+        // --- CART SYSTEM ---
+        function addToCart(menuItem) {
+            if (!currentTable) {
+                alert("ກະລຸນາເລືອກໂຕະອາຫານກ່ອນເພີ່ມເມນູ!");
                 return;
             }
-            if(!orders[currentTable]) orders[currentTable] = [];
-            
-            let existing = orders[currentTable].find(item => item.id === menuItem.id);
-            if(existing) {
+
+            const existing = currentBasket.find(x => x.id === menuItem.id);
+            if (existing) {
                 existing.qty += 1;
             } else {
-                orders[currentTable].push({
-                    id: menuItem.id,
-                    name: menuItem.name,
-                    price: menuItem.price,
-                    qty: 1
-                });
+                currentBasket.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, qty: 1 });
             }
-            saveDataToStorage();
-            renderTablesGrid();
-            renderBasketItems();
-        }
-
-        function renderBasketItems() {
-            let tbody = document.getElementById('cart-table-rows');
-            tbody.innerHTML = '';
-
-            if(!currentTable || !orders[currentTable] || orders[currentTable].length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="py-8 text-center text-xs text-slate-400 font-semibold">ຍັງບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້</td></tr>';
-                resetCalculationFields();
-                return;
-            }
-
-            orders[currentTable].forEach((item, index) => {
-                let tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 text-xs";
-                tr.innerHTML = `
-                    <td class="py-2.5 font-bold text-slate-800">${item.name}</td>
-                    <td class="py-2.5 text-center">
-                        <div class="inline-flex items-center space-x-1 bg-slate-100 rounded-lg p-0.5">
-                            <button onclick="updateQty(${index}, -1)" class="w-5 h-5 bg-white rounded-md shadow-sm text-slate-600 font-bold flex items-center justify-center hover:bg-slate-200">-</button>
-                            <span class="w-6 text-center font-bold text-slate-800">${item.qty}</span>
-                            <button onclick="updateQty(${index}, 1)" class="w-5 h-5 bg-white rounded-md shadow-sm text-slate-600 font-bold flex items-center justify-center hover:bg-slate-200">+</button>
-                        </div>
-                    </td>
-                    <td class="py-2.5 text-right font-black text-slate-900">${(item.price * item.qty).toLocaleString()} ₭</td>
-                    <td class="py-2.5 text-center">
-                        <button onclick="removeBasketItem(${index})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-xmark"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
+            renderCart();
             liveCalcChange();
         }
 
-        function updateQty(index, delta) {
-            if(!currentTable || !orders[currentTable]) return;
-            orders[currentTable][index].qty += delta;
-            if(orders[currentTable][index].qty <= 0) {
-                orders[currentTable].splice(index, 1);
+        function updateCartQty(index, delta) {
+            currentBasket[index].qty += delta;
+            if (currentBasket[index].qty <= 0) {
+                currentBasket.splice(index, 1);
             }
-            saveDataToStorage();
-            renderTablesGrid();
-            renderBasketItems();
+            renderCart();
+            liveCalcChange();
         }
 
-        function removeBasketItem(index) {
-            if(!currentTable || !orders[currentTable]) return;
-            orders[currentTable].splice(index, 1);
-            saveDataToStorage();
-            renderTablesGrid();
-            renderBasketItems();
+        function removeFromCart(index) {
+            currentBasket.splice(index, 1);
+            renderCart();
+            liveCalcChange();
         }
 
         function clearCurrentBasket() {
-            if(!currentTable) return;
-            if(confirm('ຕ້ອງການລຶບລາຍການທັງໝົດໃນໂຕະນີ້ແມ່ນບໍ?')) {
-                delete orders[currentTable];
-                saveDataToStorage();
-                renderTablesGrid();
-                renderBasketItems();
-            }
+            if (!currentTable) return;
+            currentBasket = [];
+            renderCart();
+            liveCalcChange();
         }
 
-        function resetCalculationFields() {
-            document.getElementById('text-subtotal-price').innerText = '0 ₭';
-            document.getElementById('text-total-price').innerText = '0 ₭';
-            document.getElementById('input-discount').value = 0;
-            document.getElementById('input-cash').value = '';
-            document.getElementById('input-transfer').value = '';
-            document.getElementById('input-debt').value = '';
-            document.getElementById('text-change-price').innerText = '0 ₭';
-        }
-
-        function calculateTotals() {
-            if(!currentTable || !orders[currentTable]) return { subtotal: 0, discountAmount: 0, total: 0 };
-            let subtotal = orders[currentTable].reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let discVal = parseFloat(document.getElementById('input-discount').value) || 0;
-            let discType = document.getElementById('select-discount-type').value;
-            
-            let discountAmount = 0;
-            if(discType === 'percent') {
-                discountAmount = (subtotal * discVal) / 100;
-            } else {
-                discountAmount = discVal;
-            }
-            let total = Math.max(0, subtotal - discountAmount);
-            return { subtotal, discountAmount, total };
-        }
-
-        function liveCalcChange() {
-            let { subtotal, discountAmount, total } = calculateTotals();
-            document.getElementById('text-subtotal-price').innerText = subtotal.toLocaleString() + ' ₭';
-            document.getElementById('text-total-price').innerText = total.toLocaleString() + ' ₭';
-
-            let cash = parseFloat(document.getElementById('input-cash').value) || 0;
-            let transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
-            let debt = parseFloat(document.getElementById('input-debt').value) || 0;
-
-            let change = (cash + transfer) - total;
-            document.getElementById('text-change-price').innerText = (change > 0 ? change : 0).toLocaleString() + ' ₭';
-        }
-
-        function fastSaveOrderToTable() {
-            if(!currentTable || !orders[currentTable] || orders[currentTable].length === 0) {
-                alert('ບໍ່ມີລາຍການອາຫານໃຫ້ບັນທຶກ!');
-                return;
-            }
-            saveDataToStorage();
-            renderTablesGrid();
-            alert('ບັນທຶກໂຕະ ' + currentTable + ' เรียบร้อยแล้ว!');
-        }
-
-        function printPreBill() {
-            if(!currentTable || !orders[currentTable] || orders[currentTable].length === 0) {
-                alert('ບໍ່ມີລາຍການອາຫານສຳລັບພິມບິນ!');
-                return;
-            }
-            openReceiptModal(false);
-        }
-
-        function fastProcessPayment() {
-            if(!currentTable || !orders[currentTable] || orders[currentTable].length === 0) {
-                alert('ບໍ່ມີລາຍການອາຫານສຳລັບຊຳລະເງິນ!');
-                return;
-            }
-
-            let { subtotal, discountAmount, total } = calculateTotals();
-            let cash = parseFloat(document.getElementById('input-cash').value) || 0;
-            let transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
-            let debt = parseFloat(document.getElementById('input-debt').value) || 0;
-
-            if(cash === 0 && transfer === 0 && debt === 0) {
-                cash = total;
-                document.getElementById('input-cash').value = cash;
-            }
-
-            let paymentSum = cash + transfer + debt;
-            if(paymentSum < total) {
-                alert('ຍອດເງິນຮັບຊຳລະນ້ອຍກວ່າຍອດລວມທັງໝົດ!');
-                return;
-            }
-
-            let billId = 'BILL-' + Date.now().toString().slice(-6);
-            let nowStr = new Date().toLocaleString();
-
-            let newSaleRecord = {
-                id: billId,
-                table: currentTable,
-                date: nowStr,
-                timestamp: Date.now(),
-                items: [...orders[currentTable]],
-                subtotal: subtotal,
-                discount: discountAmount,
-                total: total,
-                cash: cash,
-                transfer: transfer,
-                debt: debt,
-                status: debt > 0 ? 'DEBT' : 'PAID'
-            };
-
-            salesHistory.push(newSaleRecord);
-            delete orders[currentTable];
-            saveDataToStorage();
-
-            openReceiptModal(true, newSaleRecord);
-
-            currentTable = null;
-            document.getElementById('text-current-table').innerText = 'ຍັງບໍ່ໄດ້ເລືອກໂຕະ';
-            document.getElementById('btn-table-action').disabled = true;
-            renderTablesGrid();
-            renderBasketItems();
-            updateFrontRevenueTag();
-        }
-
-        function openReceiptModal(isPaid = false, record = null) {
-            let modal = document.getElementById('receiptModal');
-            modal.classList.remove('hidden');
-
-            let subtotal = 0, discount = 0, total = 0, cash = 0, transfer = 0, debt = 0, change = 0;
-            let itemsList = [];
-            let tableName = currentTable || (record ? record.table : 'T-01');
-            let timeStr = new Date().toLocaleString();
-
-            if(record) {
-                subtotal = record.subtotal;
-                discount = record.discount;
-                total = record.total;
-                cash = record.cash;
-                transfer = record.transfer;
-                debt = record.debt;
-                change = Math.max(0, (cash + transfer) - total);
-                itemsList = record.items;
-                timeStr = record.date;
-                document.getElementById('r-title').innerText = 'ໃບເສร็จຮັບເງິນ / RECEIPT';
-            } else {
-                let calc = calculateTotals();
-                subtotal = calc.subtotal;
-                discount = calc.discountAmount;
-                total = calc.total;
-                cash = parseFloat(document.getElementById('input-cash').value) || 0;
-                transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
-                debt = parseFloat(document.getElementById('input-debt').value) || 0;
-                change = Math.max(0, (cash + transfer) - total);
-                itemsList = orders[currentTable] || [];
-                document.getElementById('r-title').innerText = 'ໃບບິນກ່ອນຊຳລະ / PRE-BILL';
-            }
-
-            document.getElementById('r-status-tag').innerText = `ໂຕະ: ${tableName}`;
-            document.getElementById('r-meta').innerText = `ວັນທີ: ${timeStr}`;
-
-            let tbody = document.getElementById('r-items');
+        function renderCart() {
+            const tbody = document.getElementById('cart-table-rows');
             tbody.innerHTML = '';
-            itemsList.forEach(item => {
-                let tr = document.createElement('tr');
+
+            if (currentBasket.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs text-slate-400 font-semibold">ຍັງບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້</td></tr>`;
+                document.getElementById('text-subtotal-price').innerText = "0 ₭";
+                document.getElementById('text-total-price').innerText = "0 ₭";
+                return;
+            }
+
+            let subtotal = 0;
+            currentBasket.forEach((item, idx) => {
+                const totalLine = item.price * item.qty;
+                subtotal += totalLine;
+
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-50";
                 tr.innerHTML = `
-                    <td class="py-1.5 font-bold">${item.name}</td>
-                    <td class="py-1.5 text-center">${item.qty}</td>
-                    <td class="py-1.5 text-right font-black">${(item.price * item.qty).toLocaleString()} ₭</td>
+                    <td class="py-2 font-bold text-slate-800">${item.name}</td>
+                    <td class="py-2 text-center">
+                        <div class="inline-flex items-center space-x-1 bg-slate-100 rounded-lg px-1 py-0.5">
+                            <button onclick="updateCartQty(${idx}, -1)" class="w-4 h-4 bg-white rounded flex items-center justify-center font-bold text-[10px] shadow-xs">-</button>
+                            <span class="w-5 text-center font-bold">${item.qty}</span>
+                            <button onclick="updateCartQty(${idx}, 1)" class="w-4 h-4 bg-white rounded flex items-center justify-center font-bold text-[10px] shadow-xs">+</button>
+                        </div>
+                    </td>
+                    <td class="py-2 text-right font-bold text-slate-600">${totalLine.toLocaleString()} ₭</td>
+                    <td class="py-2 text-center">
+                        <button onclick="removeFromCart(${idx})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            document.getElementById('r-subtotal').innerText = subtotal.toLocaleString() + ' ₭';
-            document.getElementById('r-discount').innerText = discount.toLocaleString() + ' ₭';
-            document.getElementById('r-total').innerText = total.toLocaleString() + ' ₭';
-            document.getElementById('r-cash').innerText = cash.toLocaleString() + ' ₭';
-            document.getElementById('r-transfer').innerText = transfer.toLocaleString() + ' ₭';
-            document.getElementById('r-debt').innerText = debt.toLocaleString() + ' ₭';
-            document.getElementById('r-change').innerText = change.toLocaleString() + ' ₭';
+            document.getElementById('text-subtotal-price').innerText = `${subtotal.toLocaleString()} ₭`;
+        }
+
+        // --- CALCULATIONS & BILLING ---
+        function liveCalcChange() {
+            let subtotal = currentBasket.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const discountVal = parseFloat(document.getElementById('input-discount').value) || 0;
+            const discountType = document.getElementById('select-discount-type').value;
+
+            let discountAmount = 0;
+            if (discountType === 'percent') {
+                discountAmount = (subtotal * discountVal) / 100;
+            } else {
+                discountAmount = discountVal;
+            }
+
+            let grandTotal = subtotal - discountAmount;
+            if (grandTotal < 0) grandTotal = 0;
+
+            document.getElementById('text-total-price').innerText = `${grandTotal.toLocaleString()} ₭`;
+
+            const cash = parseFloat(document.getElementById('input-cash').value) || 0;
+            const transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
+            const debt = parseFloat(document.getElementById('input-debt').value) || 0;
+
+            const paidSum = cash + transfer + debt;
+            const change = paidSum - grandTotal;
+
+            const changeEl = document.getElementById('text-change-price');
+            if (change >= 0) {
+                changeEl.innerText = `${change.toLocaleString()} ₭`;
+                changeEl.className = "font-black text-emerald-600 text-sm";
+            } else {
+                changeEl.innerText = `ຂາດອີກ: ${Math.abs(change).toLocaleString()} ₭`;
+                changeEl.className = "font-black text-rose-600 text-sm";
+            }
+        }
+
+        function fastSaveOrderToTable() {
+            if (!currentTable) {
+                alert("ກະລຸນາເລືອກໂຕະກ່ອນ!");
+                return;
+            }
+            if (currentBasket.length === 0) {
+                delete db.tableOrders[currentTable];
+            } else {
+                db.tableOrders[currentTable] = {
+                    items: JSON.parse(JSON.stringify(currentBasket)),
+                    discount: parseFloat(document.getElementById('input-discount').value) || 0,
+                    discountType: document.getElementById('select-discount-type').value
+                };
+            }
+            renderTables();
+            alert(`ບັນທຶກອໍເດີ້ລົງໂຕະ ${currentTable} ຮຽບຮ້ອຍ!`);
+        }
+
+        function printPreBill() {
+            if (!currentTable || currentBasket.length === 0) {
+                alert("ບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້!");
+                return;
+            }
+            openReceiptModal("ໃບແຈ້ງຍອດຄ່າອາຫານ (Pre-Bill)", currentTable, "PENDING");
+        }
+
+        function fastProcessPayment() {
+            if (!currentTable || currentBasket.length === 0) {
+                alert("ບໍ່ມີລາຍການອາຫານທີ່ຕ້ອງຊຳລະ!");
+                return;
+            }
+
+            let subtotal = currentBasket.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const discountVal = parseFloat(document.getElementById('input-discount').value) || 0;
+            const discountType = document.getElementById('select-discount-type').value;
+            let discountAmount = discountType === 'percent' ? (subtotal * discountVal) / 100 : discountVal;
+            let grandTotal = subtotal - discountAmount;
+            if (grandTotal < 0) grandTotal = 0;
+
+            const cash = parseFloat(document.getElementById('input-cash').value) || 0;
+            const transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
+            const debt = parseFloat(document.getElementById('input-debt').value) || 0;
+
+            const paidSum = cash + transfer + debt;
+            if (paidSum < grandTotal) {
+                alert("ຍອດເງິນທີ່ຮັບ/ຄ້າງຊຳລະ ຍັງໜ້ອຍກວ່າທັງໝົດ!");
+                return;
+            }
+
+            const change = paidSum - grandTotal;
+
+            const now = new Date();
+            const saleRecord = {
+                id: "INV-" + Date.now().toString().slice(-6),
+                date: now.toISOString().split('T')[0],
+                time: now.toTimeString().split(' ')[0],
+                table: currentTable,
+                items: JSON.parse(JSON.stringify(currentBasket)),
+                subtotal: subtotal,
+                discount: discountAmount,
+                total: grandTotal,
+                cash: cash,
+                transfer: transfer,
+                debt: debt,
+                change: change > 0 ? change : 0,
+                status: debt > 0 ? "ຄ້າງຊຳລະ" : "ຊຳລະແລ້ວ"
+            };
+
+            db.salesHistory.push(saleRecord);
+            if (debt > 0) {
+                db.debts.push(saleRecord);
+            }
+
+            // Deduct Stock
+            currentBasket.forEach(ci => {
+                const foundStock = db.stock.find(s => s.linkedMenuId === ci.id);
+                if (foundStock) {
+                    foundStock.qty -= ci.qty;
+                }
+            });
+
+            delete db.tableOrders[currentTable];
+
+            openReceiptModal("ໃບເສร็จຮັບເງິນ (RECEIPT)", currentTable, "PAID", saleRecord);
+
+            currentBasket = [];
+            document.getElementById('input-cash').value = '';
+            document.getElementById('input-transfer').value = '';
+            document.getElementById('input-debt').value = '';
+            document.getElementById('input-discount').value = 0;
+            renderCart();
+            renderTables();
+            renderStockTable();
+            updateDailyRevenueTag();
+        }
+
+        // --- RECEIPT MODAL ---
+        function openReceiptModal(title, table, status, record = null) {
+            document.getElementById('r-title').innerText = title;
+            document.getElementById('r-status-tag').innerText = `ໂຕະ: ${table} | ສະຖານະ: ${status}`;
+            const now = new Date();
+            document.getElementById('r-meta').innerText = `ວັນທີ: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+
+            const items = record ? record.items : currentBasket;
+            const tbody = document.getElementById('r-items');
+            tbody.innerHTML = '';
+
+            let subtotal = 0;
+            items.forEach(i => {
+                const lineTotal = i.price * i.qty;
+                subtotal += lineTotal;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-1 font-bold text-slate-800">${i.name}</td>
+                    <td class="py-1 text-center font-bold">${i.qty}</td>
+                    <td class="py-1 text-right font-bold">${lineTotal.toLocaleString()} ₭</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const discount = record ? record.discount : (parseFloat(document.getElementById('input-discount').value) || 0);
+            const total = record ? record.total : (subtotal - discount);
+
+            document.getElementById('r-subtotal').innerText = `${subtotal.toLocaleString()} ₭`;
+            document.getElementById('r-discount').innerText = `${discount.toLocaleString()} ₭`;
+            document.getElementById('r-total').innerText = `${total.toLocaleString()} ₭`;
+            document.getElementById('r-cash').innerText = `${record ? record.cash : (parseFloat(document.getElementById('input-cash').value) || 0).toLocaleString()} ₭`;
+            document.getElementById('r-transfer').innerText = `${record ? record.transfer : (parseFloat(document.getElementById('input-transfer').value) || 0).toLocaleString()} ₭`;
+            document.getElementById('r-debt').innerText = `${record ? record.debt : (parseFloat(document.getElementById('input-debt').value) || 0).toLocaleString()} ₭`;
+            document.getElementById('r-change').innerText = `${record ? record.change : 0} ₭`;
+
+            document.getElementById('receiptModal').classList.remove('hidden');
         }
 
         function closeReceiptModal() {
             document.getElementById('receiptModal').classList.add('hidden');
         }
 
+        // --- EDIT & CANCEL BILL FUNCTIONS ---
+        function openEditBillModal(invoiceId) {
+            const sale = db.salesHistory.find(s => s.id === invoiceId);
+            if (!sale) return;
+            if (sale.status === "ຍົກເລີກແລ້ວ") {
+                alert("ບິນນີ້ຖືກຍົກເລີກໄປແລ້ວ ບໍ່ສາມາດແກ້ໄຂໄດ້!");
+                return;
+            }
+
+            currentEditingId = invoiceId;
+            document.getElementById('edit-bill-id').innerText = sale.id;
+            document.getElementById('edit-bill-cash').value = sale.cash;
+            document.getElementById('edit-bill-transfer').value = sale.transfer;
+            document.getElementById('edit-bill-total').innerText = `${sale.total.toLocaleString()} ₭`;
+
+            const tbody = document.getElementById('edit-bill-items-rows');
+            tbody.innerHTML = '';
+            sale.items.forEach(i => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-1.5 font-bold text-slate-800">${i.name}</td>
+                    <td class="py-1.5 text-center font-bold">${i.qty}</td>
+                    <td class="py-1.5 text-right font-bold">${(i.price * i.qty).toLocaleString()} ₭</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('editBillModal').classList.remove('hidden');
+        }
+
+        function closeEditBillModal() {
+            document.getElementById('editBillModal').classList.add('hidden');
+            currentEditingId = null;
+        }
+
+        function saveEditedBill() {
+            const sale = db.salesHistory.find(s => s.id === currentEditingId);
+            if (!sale) return;
+
+            const newCash = parseFloat(document.getElementById('edit-bill-cash').value) || 0;
+            const newTransfer = parseFloat(document.getElementById('edit-bill-transfer').value) || 0;
+
+            if ((newCash + newTransfer) < sale.total) {
+                alert("ຍອດເງິນສົດ + ໂອນ ຕ້ອງບໍ່ໜ້ອຍກວ່າອດລວມຂອງບິນ!");
+                return;
+            }
+
+            sale.cash = newCash;
+            sale.transfer = newTransfer;
+
+            closeEditBillModal();
+            loadSalesReport();
+            alert("ອັບເດດຂໍ້ມູນບິນສຳເລັດ!");
+        }
+
+        function cancelBill(invoiceId) {
+            if (!confirm(`ທ່ານຕ້ອງການຍົກເລີກບິນ ${invoiceId} ແທ້ບໍ? (ສະຕ໋ອກສິນຄ້າຈະຖືກຄືນອັດຕະໂນມັດ)`)) {
+                return;
+            }
+
+            const sale = db.salesHistory.find(s => s.id === invoiceId);
+            if (!sale) return;
+            if (sale.status === "ຍົກເລີກແລ້ວ") {
+                alert("ບິນນີ້ຖືກຍົກເລີກໄປແລ້ວ!");
+                return;
+            }
+
+            // 1. Mark as Canceled
+            sale.status = "ຍົກເລີກແລ້ວ";
+
+            // 2. Return Stock
+            sale.items.forEach(ci => {
+                const foundStock = db.stock.find(s => s.linkedMenuId === ci.id);
+                if (foundStock) {
+                    foundStock.qty += ci.qty; // Return qty
+                }
+            });
+
+            // 3. Remove from Debts if it was debt
+            db.debts = db.debts.filter(d => d.id !== invoiceId);
+
+            loadSalesReport();
+            renderStockTable();
+            updateDailyRevenueTag();
+            alert(`ຍົກເລີກບິນ ${invoiceId} ຮຽບຮ້ອຍແລ້ວ!`);
+        }
+
+        // --- TABLE ACTIONS (MOVE / MERGE) ---
         function openTableActionModal() {
-            if(!currentTable) return;
+            if (!currentTable) return;
             document.getElementById('text-action-src-table').innerText = currentTable;
-            document.getElementById('tableActionModal').classList.remove('hidden');
             tableActionType = 'move';
-            selectedTargetTable = null;
             updateTableActionUI();
+
+            const select = document.getElementById('select-target-table');
+            select.innerHTML = '';
+            db.tables.forEach(t => {
+                if (t !== currentTable) {
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.innerText = `ໂຕະ ${t}`;
+                    select.appendChild(opt);
+                }
+            });
+
+            document.getElementById('tableActionModal').classList.remove('hidden');
         }
 
         function closeTableActionModal() {
@@ -962,416 +1073,371 @@
 
         function toggleTableActionTab(type) {
             tableActionType = type;
-            let btnMove = document.getElementById('btn-tab-move');
-            let btnMerge = document.getElementById('btn-tab-merge');
-            if(type === 'move') {
-                btnMove.className = "py-2.5 text-center font-bold text-xs rounded-xl bg-orange-500 text-white shadow-md";
-                btnMerge.className = "py-2.5 text-center font-bold text-xs rounded-xl text-slate-600 hover:bg-slate-200";
-            } else {
-                btnMerge.className = "py-2.5 text-center font-bold text-xs rounded-xl bg-orange-500 text-white shadow-md";
-                btnMove.className = "py-2.5 text-center font-bold text-xs rounded-xl text-slate-600 hover:bg-slate-200";
-            }
-            selectedTargetTable = null;
             updateTableActionUI();
         }
 
         function updateTableActionUI() {
-            let container = document.getElementById('grid-action-target-tables');
-            container.innerHTML = '';
-            tables.forEach(t => {
-                if(t.id === currentTable) return;
-                let hasOrder = orders[t.id] && orders[t.id].length > 0;
-                let isSelected = selectedTargetTable === t.id;
-                let btn = document.createElement('button');
-                btn.className = `p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center space-y-1 ${isSelected ? 'bg-orange-500 text-white border-orange-600 shadow-md' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`;
-                btn.onclick = () => { selectedTargetTable = t.id; updateTableActionUI(); };
-                btn.innerHTML = `
-                    <span>${t.name}</span>
-                    <span class="text-[10px] ${hasOrder ? 'text-orange-500' : 'text-slate-400'}">${hasOrder ? 'ມີລາຍການ' : 'ວ່າງ'}</span>
-                `;
-                container.appendChild(btn);
-            });
+            const btnMove = document.getElementById('btn-tab-move');
+            const btnMerge = document.getElementById('btn-tab-merge');
+            const labelTarget = document.getElementById('label-target-table');
+
+            if (tableActionType === 'move') {
+                btnMove.className = "py-2.5 text-center font-bold text-xs rounded-xl bg-orange-500 text-white shadow-md";
+                btnMerge.className = "py-2.5 text-center font-bold text-xs rounded-xl bg-slate-100 text-slate-600";
+                labelTarget.innerText = "ເລືອກໂຕະປາຍທາງ (ຍ້າຍໄປໂຕະຫວ່າງ)";
+            } else {
+                btnMerge.className = "py-2.5 text-center font-bold text-xs rounded-xl bg-orange-500 text-white shadow-md";
+                btnMove.className = "py-2.5 text-center font-bold text-xs rounded-xl bg-slate-100 text-slate-600";
+                labelTarget.innerText = "ເລືອກໂຕະທີ່ຈະລວມເຂົ້າກັນ";
+            }
         }
 
         function executeTableAction() {
-            if(!selectedTargetTable) {
-                alert('ກະລຸນາເລືອກໂຕະປາຍທາງ!');
-                return;
-            }
-            if(!orders[currentTable] || orders[currentTable].length === 0) {
-                alert('ໂຕະຕົ້ນທາງບໍ່ມີລາຍການອາຫານ!');
+            const targetTable = document.getElementById('select-target-table').value;
+            if (!targetTable) {
+                alert("ກະລຸນາເລືອກໂຕະປາຍທາງ!");
                 return;
             }
 
-            if(tableActionType === 'move') {
-                orders[selectedTargetTable] = [...orders[currentTable]];
-                delete orders[currentTable];
-                currentTable = selectedTargetTable;
+            if (tableActionType === 'move') {
+                if (db.tableOrders[currentTable]) {
+                    db.tableOrders[targetTable] = db.tableOrders[currentTable];
+                    delete db.tableOrders[currentTable];
+                }
+                alert(`ຍ້າຍຈາກໂຕະ ${currentTable} ໄປໂຕະ ${targetTable} สำເລັດ!`);
             } else {
-                if(!orders[selectedTargetTable]) orders[selectedTargetTable] = [];
-                orders[currentTable].forEach(srcItem => {
-                    let found = orders[selectedTargetTable].find(item => item.id === srcItem.id);
-                    if(found) {
-                        found.qty += srcItem.qty;
-                    } else {
-                        orders[selectedTargetTable].push({...srcItem});
-                    }
-                });
-                delete orders[currentTable];
-                currentTable = selectedTargetTable;
+                if (!db.tableOrders[targetTable]) {
+                    db.tableOrders[targetTable] = { items: [], discount: 0, discountType: 'amount' };
+                }
+                if (db.tableOrders[currentTable]) {
+                    db.tableOrders[currentTable].items.forEach(ci => {
+                        const existing = db.tableOrders[targetTable].items.find(x => x.id === ci.id);
+                        if (existing) {
+                            existing.qty += ci.qty;
+                        } else {
+                            db.tableOrders[targetTable].items.push(JSON.parse(JSON.stringify(ci)));
+                        }
+                    });
+                    delete db.tableOrders[currentTable];
+                }
+                alert(`ລວມໂຕະ ${currentTable} ເຂົ້າກັບໂຕະ ${targetTable} สำເລັດ!`);
             }
 
-            saveDataToStorage();
             closeTableActionModal();
-            selectTable(currentTable);
-            alert('ດຳເນີນການສຳເລັດ!');
+            currentTable = null;
+            currentBasket = [];
+            document.getElementById('text-current-table').innerText = "ໂຕະອາຫານ: ຍັງບໍ່ໄດ້ເລືອກ";
+            document.getElementById('btn-table-action').setAttribute('disabled', 'true');
+            renderTables();
+            renderCart();
         }
 
-        function loadSalesReport() {
-            let dateVal = document.getElementById('report-date-select').value;
-            let filtered = salesHistory.filter(s => {
-                let sDateStr = new Date(s.timestamp).toISOString().split('T')[0];
-                return sDateStr === dateVal;
-            });
+        // --- STOCK MANAGEMENT ---
+        function renderStockTable() {
+            const tbody = document.getElementById('stock-table-rows');
+            tbody.innerHTML = '';
+            const keyword = (document.getElementById('stock-search').value || '').toLowerCase();
 
-            let sumAll = 0, sumCash = 0, sumTransfer = 0, sumDebt = 0;
+            const filtered = db.stock.filter(s => s.name.toLowerCase().includes(keyword));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-xs text-slate-400 font-semibold">ບໍ່ພົບຂໍ້ມູນສະຕ໋ອກ</td></tr>`;
+                return;
+            }
+
             filtered.forEach(s => {
-                sumAll += s.total;
-                sumCash += s.cash;
-                sumTransfer += s.transfer;
-                sumDebt += s.debt;
+                const isLow = s.qty <= s.min;
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-50";
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-slate-800">${s.name}</td>
+                    <td class="p-2.5 text-center font-bold ${isLow ? 'text-rose-600' : 'text-slate-800'}">${s.qty}</td>
+                    <td class="p-2.5 text-center font-bold text-slate-500">${s.unit}</td>
+                    <td class="p-2.5 text-center">
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-black ${isLow ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}">
+                            ${isLow ? 'ໃກ້ໝົດ/ໝົດ' : 'ປົກກະຕິ'}
+                        </span>
+                    </td>
+                    <td class="p-2.5 text-right">
+                        <button onclick="deleteStockItem(${s.id})" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-[10px] font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
+        }
 
-            document.getElementById('text-revenue-sum').innerText = sumAll.toLocaleString();
-            document.getElementById('text-revenue-cash').innerText = sumCash.toLocaleString();
-            document.getElementById('text-revenue-transfer').innerText = sumTransfer.toLocaleString();
-            document.getElementById('text-revenue-debt').innerText = sumDebt.toLocaleString();
+        function addStockItem() {
+            const name = document.getElementById('st-name').value.trim();
+            const qty = parseFloat(document.getElementById('st-qty').value) || 0;
+            const unit = document.getElementById('st-unit').value.trim();
+            const min = parseFloat(document.getElementById('st-min').value) || 5;
+            const linkedMenuId = parseInt(document.getElementById('st-linked-menu').value) || null;
 
-            let rowsContainer = document.getElementById('sales-history-rows');
-            rowsContainer.innerHTML = '';
-
-            if(filtered.length === 0) {
-                rowsContainer.innerHTML = '<div class="py-6 text-center text-xs text-slate-400 font-semibold">ບໍ່ມີປະຫວັດການຂາຍໃນວັນທີນີ້</div>';
+            if (!name || !unit) {
+                alert("ກະລຸນາໃສ່ຊື່ແລະຫົວໜ່ວຍວັດຖຸດິບ!");
                 return;
             }
 
-            filtered.slice().reverse().forEach(s => {
-                let div = document.createElement('div');
-                div.className = "flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs";
-                div.innerHTML = `
-                    <div class="space-y-0.5">
-                        <div class="flex items-center space-x-2">
-                            <span class="font-black text-slate-800">${s.id}</span>
-                            <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-lg text-[10px] font-bold">ໂຕະ ${s.table}</span>
-                            <span class="text-slate-400 font-medium">${s.date}</span>
-                        </div>
-                        <p class="text-slate-500 font-medium">ລາຍການ: ${s.items.map(i => `${i.name} (${i.qty})`).join(', ')}</p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right">
-                            <span class="font-black text-slate-900 text-sm">${s.total.toLocaleString()} ₭</span>
-                            <span class="block text-[10px] text-slate-400 font-semibold">ສົດ: ${s.cash.toLocaleString()} | ໂອນ: ${s.transfer.toLocaleString()} | ຕິດ: ${s.debt.toLocaleString()}</span>
-                        </div>
-                        <button onclick="openEditBillModal('${s.id}')" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 font-bold rounded-xl text-slate-700 transition-all">ແກ້ໄຂ</button>
-                    </div>
-                `;
-                rowsContainer.appendChild(div);
-            });
+            db.stock.push({ id: Date.now(), name, qty, unit, min, linkedMenuId });
+            document.getElementById('st-name').value = '';
+            document.getElementById('st-qty').value = '';
+            document.getElementById('st-unit').value = '';
+            renderStockTable();
+            alert("ເພີ່ມສະຕ໋ອກສຳເລັດ!");
         }
 
-        function updateFrontRevenueTag() {
-            let todayStr = new Date().toISOString().split('T')[0];
-            let sum = salesHistory.filter(s => new Date(s.timestamp).toISOString().split('T')[0] === todayStr).reduce((a, b) => a + b.total, 0);
-            document.getElementById('front-revenue-tag').innerText = `ຍອດມື້ນີ້: ${sum.toLocaleString()} ₭`;
+        function deleteStockItem(id) {
+            db.stock = db.stock.filter(s => s.id !== id);
+            renderStockTable();
         }
 
-        function loadDebtsReport() {
-            let debtsList = salesHistory.filter(s => s.debt > 0);
-            let totalDebtSum = debtsList.reduce((acc, s) => acc + s.debt, 0);
-            document.getElementById('text-total-debt-sum').innerText = totalDebtSum.toLocaleString() + ' ₭';
-
-            let container = document.getElementById('debts-list-rows');
-            container.innerHTML = '';
-
-            if(debtsList.length === 0) {
-                container.innerHTML = '<div class="py-6 text-center text-xs text-slate-400 font-semibold">ບໍ່ມີລາຍການຄ້າງຊຳລະ</div>';
-                return;
-            }
-
-            debtsList.slice().reverse().forEach(s => {
-                let div = document.createElement('div');
-                div.className = "flex justify-between items-center p-4 bg-rose-50/40 border border-rose-100 rounded-2xl text-xs";
-                div.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center space-x-2">
-                            <span class="font-black text-slate-800">${s.id}</span>
-                            <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-lg text-[10px] font-bold">ໂຕະ ${s.table}</span>
-                            <span class="text-slate-400">${s.date}</span>
-                        </div>
-                        <p class="text-slate-600 font-medium">ລາຍການ: ${s.items.map(i => `${i.name} (${i.qty})`).join(', ')}</p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right">
-                            <span class="font-black text-rose-600 text-sm">${s.debt.toLocaleString()} ₭</span>
-                            <span class="block text-[10px] text-slate-400 font-semibold">ຍອດບິນທັງໝົດ: ${s.total.toLocaleString()} ₭</span>
-                        </div>
-                        <button onclick="payOffDebt('${s.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-all">ຮັບຊຳລະໜີ້</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function payOffDebt(billId) {
-            let bill = salesHistory.find(s => s.id === billId);
-            if(!bill) return;
-            let amount = bill.debt;
-            if(confirm(`ຢືນຢັນການຮັບຊຳລະໜີ້ ${amount.toLocaleString()} ₭ ສຳລັບບິນ ${billId} ?`)) {
-                bill.cash += amount;
-                bill.debt = 0;
-                bill.status = 'PAID';
-                saveDataToStorage();
-                loadDebtsReport();
-                updateFrontRevenueTag();
-                alert('ບັນທຶກການຊຳລະໜີ້ຮຽບຮ້ອຍແລ້ວ!');
-            }
-        }
-
-        function openEditBillModal(billId) {
-            activeEditingBillId = billId;
-            let bill = salesHistory.find(s => s.id === billId);
-            if(!bill) return;
-
-            document.getElementById('edit-bill-id').innerText = bill.id;
-            document.getElementById('edit-bill-cash').value = bill.cash;
-            document.getElementById('edit-bill-transfer').value = bill.transfer;
-            document.getElementById('edit-bill-debt').value = bill.debt;
-            document.getElementById('edit-bill-status').value = bill.status || 'PAID';
-
-            let container = document.getElementById('edit-bill-items-container');
-            container.innerHTML = '';
-            bill.items.forEach((item) => {
-                let div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-50 p-2.5 rounded-xl text-xs";
-                div.innerHTML = `
-                    <span class="font-bold text-slate-800">${item.name}</span>
-                    <div class="flex items-center space-x-2">
-                        <span>ຈຳນວນ: ${item.qty}</span>
-                        <span class="font-black text-slate-900">${(item.price * item.qty).toLocaleString()} ₭</span>
-                    </div>
-                `;
-                container.appendChild(div);
+        // --- ADMIN SETTINGS ---
+        function renderAdminLists() {
+            const catList = document.getElementById('admin-category-list');
+            catList.innerHTML = '';
+            db.categories.forEach(c => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs font-bold";
+                div.innerHTML = `<span>${c}</span> <button onclick="deleteCategory('${c}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>`;
+                catList.appendChild(div);
             });
 
-            document.getElementById('editBillModal').classList.remove('hidden');
-        }
-
-        function closeEditBillModal() {
-            document.getElementById('editBillModal').classList.add('hidden');
-            activeEditingBillId = null;
-        }
-
-        function saveEditedBill() {
-            let bill = salesHistory.find(s => s.id === activeEditingBillId);
-            if(!bill) return;
-
-            bill.cash = parseFloat(document.getElementById('edit-bill-cash').value) || 0;
-            bill.transfer = parseFloat(document.getElementById('edit-bill-transfer').value) || 0;
-            bill.debt = parseFloat(document.getElementById('edit-bill-debt').value) || 0;
-            bill.status = document.getElementById('edit-bill-status').value;
-
-            saveDataToStorage();
-            closeEditBillModal();
-            loadSalesReport();
-            updateFrontRevenueTag();
-            alert('ບັນທຶກການແກ້ໄຂຮຽບຮ້ອຍແລ້ວ!');
-        }
-
-        function loadAdminPanel() {
-            let catContainer = document.getElementById('admin-category-list');
-            catContainer.innerHTML = '';
-            categories.forEach((c, idx) => {
-                if(c.name === 'ທັງໝົດ') return;
-                let div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs font-bold text-slate-700";
-                div.innerHTML = `
-                    <span>${c.name}</span>
-                    <button onclick="deleteCategory(${idx})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>
-                `;
-                catContainer.appendChild(div);
+            const tableList = document.getElementById('admin-table-list');
+            tableList.innerHTML = '';
+            db.tables.forEach(t => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs font-bold";
+                div.innerHTML = `<span>${t}</span> <button onclick="deleteTable('${t}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>`;
+                tableList.appendChild(div);
             });
 
-            let tblContainer = document.getElementById('admin-table-list');
-            tblContainer.innerHTML = '';
-            tables.forEach((t, idx) => {
-                let div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs font-bold text-slate-700";
-                div.innerHTML = `
-                    <span>${t.name}</span>
-                    <button onclick="deleteTable(${idx})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>
-                `;
-                tblContainer.appendChild(div);
+            const menuTypeSelect = document.getElementById('m-type');
+            menuTypeSelect.innerHTML = '';
+            db.categories.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.innerText = c;
+                menuTypeSelect.appendChild(opt);
             });
 
-            let selectType = document.getElementById('m-type');
-            selectType.innerHTML = '';
-            categories.forEach(c => {
-                if(c.name === 'ທັງໝົດ') return;
-                let opt = document.createElement('option');
-                opt.value = c.name;
-                opt.innerText = c.name;
-                selectType.appendChild(opt);
+            const stockMenuSelect = document.getElementById('st-linked-menu');
+            stockMenuSelect.innerHTML = '<option value="">-- ບໍ່ຜູກ (ເປັນວັດຖຸດິບລວມ) --</option>';
+            db.menu.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.innerText = m.name;
+                stockMenuSelect.appendChild(opt);
             });
 
-            let menuContainer = document.getElementById('admin-menu-list');
-            menuContainer.innerHTML = '';
-            menu.forEach((m, idx) => {
-                let div = document.createElement('div');
-                div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700";
-                div.innerHTML = `
-                    <div>
-                        <span class="font-bold text-slate-900">${m.name}</span>
-                        <span class="text-[10px] text-orange-500 block">${m.price.toLocaleString()} ₭ (${m.type})</span>
-                    </div>
-                    <button onclick="deleteMenu(${idx})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>
-                `;
-                menuContainer.appendChild(div);
+            const menuList = document.getElementById('admin-menu-list');
+            menuList.innerHTML = '';
+            db.menu.forEach(m => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl text-xs font-bold";
+                div.innerHTML = `<span>${m.name} (${m.price.toLocaleString()} ₭)</span> <button onclick="deleteMenu(${m.id})" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>`;
+                menuList.appendChild(div);
             });
         }
 
         function addCategory() {
-            let name = document.getElementById('c-name').value.trim();
-            if(!name) return;
-            categories.push({ id: 'c_' + Date.now(), name: name });
-            document.getElementById('c-name').value = '';
-            saveDataToStorage();
-            loadAdminPanel();
-            renderCategories();
+            const name = document.getElementById('c-name').value.trim();
+            if (name && !db.categories.includes(name)) {
+                db.categories.push(name);
+                document.getElementById('c-name').value = '';
+                renderCategories();
+                renderAdminLists();
+            }
         }
 
-        function deleteCategory(idx) {
-            categories.splice(idx, 1);
-            saveDataToStorage();
-            loadAdminPanel();
+        function deleteCategory(name) {
+            db.categories = db.categories.filter(c => c !== name);
             renderCategories();
+            renderAdminLists();
         }
 
         function addTable() {
-            let name = document.getElementById('t-name').value.trim();
-            if(!name) return;
-            tables.push({ id: name, name: name, status: 'empty' });
-            document.getElementById('t-name').value = '';
-            saveDataToStorage();
-            loadAdminPanel();
-            renderTablesGrid();
+            const name = document.getElementById('t-name').value.trim();
+            if (name && !db.tables.includes(name)) {
+                db.tables.push(name);
+                document.getElementById('t-name').value = '';
+                renderTables();
+                renderAdminLists();
+            }
         }
 
-        function deleteTable(idx) {
-            tables.splice(idx, 1);
-            saveDataToStorage();
-            loadAdminPanel();
-            renderTablesGrid();
+        function deleteTable(name) {
+            db.tables = db.tables.filter(t => t !== name);
+            renderTables();
+            renderAdminLists();
         }
 
         function addMenu() {
-            let name = document.getElementById('m-name').value.trim();
-            let price = parseFloat(document.getElementById('m-price').value) || 0;
-            let type = document.getElementById('m-type').value;
-            if(!name || price <= 0) {
-                alert('ກະລຸນາໃສ່ຊື່ເມນູ ແລະ ລາຄາໃຫ້ຖືກຕ້ອງ!');
-                return;
+            const name = document.getElementById('m-name').value.trim();
+            const price = parseFloat(document.getElementById('m-price').value) || 0;
+            const type = document.getElementById('m-type').value;
+
+            if (name && price > 0) {
+                db.menu.push({ id: Date.now(), name, price, type });
+                document.getElementById('m-name').value = '';
+                document.getElementById('m-price').value = '';
+                renderMenu();
+                renderAdminLists();
             }
-            menu.push({ id: 'm_' + Date.now(), name: name, price: price, type: type });
-            document.getElementById('m-name').value = '';
-            document.getElementById('m-price').value = '';
-            saveDataToStorage();
-            loadAdminPanel();
-            renderMenuGrid();
         }
 
-        function deleteMenu(idx) {
-            menu.splice(idx, 1);
-            saveDataToStorage();
-            loadAdminPanel();
-            renderMenuGrid();
+        function deleteMenu(id) {
+            db.menu = db.menu.filter(m => m.id !== id);
+            renderMenu();
+            renderAdminLists();
+        }
+
+        // --- REPORTS & DEBTS ---
+        function loadSalesReport() {
+            const selectedDate = document.getElementById('report-date-select').value;
+            const filteredSales = db.salesHistory.filter(s => s.date === selectedDate);
+
+            let sum = 0, cashSum = 0, transferSum = 0, debtSum = 0;
+            filteredSales.forEach(s => {
+                if (s.status !== "ຍົກເລີກແລ້ວ") {
+                    sum += s.total;
+                    cashSum += s.cash;
+                    transferSum += s.transfer;
+                    debtSum += s.debt;
+                }
+            });
+
+            document.getElementById('text-revenue-sum').innerText = `${sum.toLocaleString()} ₭`;
+            document.getElementById('text-revenue-cash').innerText = `${cashSum.toLocaleString()} ₭`;
+            document.getElementById('text-revenue-transfer').innerText = `${transferSum.toLocaleString()} ₭`;
+            document.getElementById('text-revenue-debt').innerText = `${debtSum.toLocaleString()} ₭`;
+
+            const container = document.getElementById('sales-history-rows');
+            container.innerHTML = '';
+
+            if (filteredSales.length === 0) {
+                container.innerHTML = `<div class="py-6 text-center text-xs text-slate-400 font-semibold">ບໍ່ມີປະຫວັດການຂາຍໃນວັນທີນີ້</div>`;
+                return;
+            }
+
+            filteredSales.forEach(s => {
+                const isCanceled = s.status === "ຍົກເລີກແລ້ວ";
+                const div = document.createElement('div');
+                div.className = `bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex justify-between items-center text-xs ${isCanceled ? 'opacity-60 bg-rose-50/40' : ''}`;
+                div.innerHTML = `
+                    <div>
+                        <span class="font-black text-orange-600">${s.id}</span> | <span class="font-bold text-slate-800">ໂຕະ: ${s.table}</span>
+                        <p class="text-[10px] ${isCanceled ? 'text-rose-500' : 'text-slate-400'} font-semibold">${s.time} | ສະຖານະ: ${s.status}</p>
+                    </div>
+                    <div class="text-right flex items-center space-x-2">
+                        <div>
+                            <span class="font-black text-slate-900">${s.total.toLocaleString()} ₭</span>
+                        </div>
+                        <div class="space-x-1 flex">
+                            <button onclick='openReceiptModal("ໃບເສร็จ", "${s.table}", "${s.status}", ${JSON.stringify(s)})' class="px-2 py-1 bg-slate-800 text-white rounded text-[10px] font-bold" title="ເບິ່ງບິນ"><i class="fa-solid fa-eye"></i></button>
+                            ${!isCanceled ? `
+                                <button onclick='openEditBillModal("${s.id}")' class="px-2 py-1 bg-amber-500 text-white rounded text-[10px] font-bold" title="ແກ້ໄຂບິນ"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick='cancelBill("${s.id}")' class="px-2 py-1 bg-rose-500 text-white rounded text-[10px] font-bold" title="ຍົກເລີກບິນ"><i class="fa-solid fa-ban"></i></button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateDailyRevenueTag() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todaySales = db.salesHistory.filter(s => s.date === todayStr && s.status !== "ຍົກເລີກແລ້ວ");
+            const sum = todaySales.reduce((acc, x) => acc + x.total, 0);
+            document.getElementById('front-revenue-tag').innerText = `ຍອດມື້ນີ້: ${sum.toLocaleString()} ₭`;
         }
 
         function exportDailyCSV() {
-            let dateVal = document.getElementById('report-date-select').value;
-            let filtered = salesHistory.filter(s => new Date(s.timestamp).toISOString().split('T')[0] === dateVal);
-            if(filtered.length === 0) {
-                alert('ບໍ່ມີຂໍ້ມູນໃນວັນທີນີ້ສຳລັບ Export!');
+            const selectedDate = document.getElementById('report-date-select').value;
+            const filteredSales = db.salesHistory.filter(s => s.date === selectedDate);
+            if (filteredSales.length === 0) {
+                alert("ບໍ່ມີຂໍ້ມູນສົ່ງອອກ!");
                 return;
             }
-            exportCSVData(filtered, `sales_daily_${dateVal}.csv`);
-        }
 
-        function exportMonthlyCSV() {
-            let dateVal = document.getElementById('report-date-select').value;
-            let monthPrefix = dateVal.slice(0, 7);
-            let filtered = salesHistory.filter(s => new Date(s.timestamp).toISOString().slice(0, 7) === monthPrefix);
-            if(filtered.length === 0) {
-                alert('ບໍ່ມີຂໍ້ມູນໃນເດືອນນີ້ສຳລັບ Export!');
-                return;
-            }
-            exportCSVData(filtered, `sales_monthly_${monthPrefix}.csv`);
-        }
-
-        function exportCSVData(dataArray, filename) {
-            let csvContent = "\uFEFFBillID,Table,Date,Subtotal,Discount,Total,Cash,Transfer,Debt,Status\n";
-            dataArray.forEach(s => {
-                csvContent += `"${s.id}","${s.table}","${s.date}",${s.subtotal},${s.discount},${s.total},${s.cash},${s.transfer},${s.debt},"${s.status}"\n`;
+            let csv = "InvoiceID,Date,Time,Table,Total,Status\n";
+            filteredSales.forEach(s => {
+                csv += `${s.id},${s.date},${s.time},${s.table},${s.total},${s.status}\n`;
             });
 
-            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
+            a.download = `sales_report_${selectedDate}.csv`;
             a.click();
-            URL.revokeObjectURL(url);
         }
 
+        function renderDebtsList() {
+            const container = document.getElementById('debts-list-rows');
+            container.innerHTML = '';
+
+            let totalDebtSum = 0;
+            db.debts.forEach(d => {
+                totalDebtSum += d.debt;
+            });
+            document.getElementById('text-total-debt-sum').innerText = `${totalDebtSum.toLocaleString()} ₭`;
+
+            if (db.debts.length === 0) {
+                container.innerHTML = `<div class="py-6 text-center text-xs text-slate-400 font-semibold">ບໍ່ມີລາຍການຄ້າງຊຳລະ (ລູກໜີ້)</div>`;
+                return;
+            }
+
+            db.debts.forEach((d, idx) => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-50 border border-rose-200 rounded-2xl p-3.5 flex justify-between items-center text-xs";
+                div.innerHTML = `
+                    <div>
+                        <span class="font-black text-rose-600">${d.id}</span> | <span class="font-bold text-slate-800">ໂຕະ: ${d.table} (${d.date})</span>
+                        <p class="text-xs font-bold text-rose-700 mt-0.5">ຍອດຄ້າງໜີ້: ${d.debt.toLocaleString()} ₭</p>
+                    </div>
+                    <button onclick="payOffDebt(${idx})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-2 rounded-xl text-xs transition-all">ຊຳລະໜີ້ແລ້ວ</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function payOffDebt(index) {
+            db.debts.splice(index, 1);
+            alert("ບັນທຶກຊຳລະໜີ້ຮຽບຮ້ອຍ!");
+            renderDebtsList();
+        }
+
+        // --- BACKUP & RESTORE MODAL ---
         function openBackupModal() {
             document.getElementById('backupModal').classList.remove('hidden');
         }
-
         function closeBackupModal() {
             document.getElementById('backupModal').classList.add('hidden');
         }
-
-        function downloadBackupJSON() {
-            let backupObj = { categories, tables, menu, orders, salesHistory };
-            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj, null, 2));
-            let a = document.createElement('a');
+        function exportJSONData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            const a = document.createElement('a');
             a.href = dataStr;
-            a.download = `viengxay_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `pos_backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
         }
-
-        function processRestoreJSON() {
-            let fileInput = document.getElementById('restore-file-input');
-            if(fileInput.files.length === 0) {
-                alert('ກະລຸນາເລືອກໄຟລ໌ JSON ສຳລັບ Restore!');
+        function importJSONData() {
+            const fileInput = document.getElementById('import-file');
+            if (fileInput.files.length === 0) {
+                alert("ກະລຸນາເລືອກໄຟລ໌ JSON ກ່ອນ!");
                 return;
             }
-            let file = fileInput.files[0];
-            let reader = new FileReader();
+            const file = fileInput.files[0];
+            const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    let parsed = JSON.parse(e.target.result);
-                    if(parsed.categories) categories = parsed.categories;
-                    if(parsed.tables) tables = parsed.tables;
-                    if(parsed.menu) menu = parsed.menu;
-                    if(parsed.orders) orders = parsed.orders;
-                    if(parsed.salesHistory) salesHistory = parsed.salesHistory;
-
-                    saveDataToStorage();
+                    db = JSON.parse(e.target.result);
+                    initApp();
                     closeBackupModal();
-                    initializeAppUI();
-                    alert('ກູ້ຄືນຂໍ້ມູນສຳເລັດ!');
-                } catch(err) {
-                    alert('ໄຟລ໌ JSON ບໍ່ຖືກຕ້ອງ!');
+                    alert("ກູ້ຄືນຂໍ້ມູນສຳເລັດ!");
+                } catch (err) {
+                    alert("ໄຟລ໌ JSON ບໍ່ຖືກຕ້ອງ!");
                 }
             };
             reader.readAsText(file);
