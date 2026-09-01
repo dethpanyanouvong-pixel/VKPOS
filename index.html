@@ -122,7 +122,7 @@
                             <span class="text-[10px] text-slate-400 font-semibold">ລາຍການອາຫານໃນໂຕະ</span>
                         </div>
                         <div class="flex items-center space-x-1">
-                            <button onclick="openTableActionModal()" id="btn-table-action" disabled class="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-orange-500 hover:text-white transition-all disabled:opacity-40">ຍ้าย/ລວມໂຕະ</button>
+                            <button onclick="openTableActionModal()" id="btn-table-action" disabled class="px-2.5 py-1 bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold hover:bg-orange-500 hover:text-white transition-all disabled:opacity-40">ຍ້າຍ/ລວມໂຕະ</button>
                             <button onclick="clearCurrentBasket()" class="w-7 h-7 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center text-xs font-bold hover:bg-rose-500 hover:text-white transition-all"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
@@ -195,7 +195,7 @@
                             <p class="text-xs text-slate-400 font-semibold">ກວດສອບ ແລະ ເພີ່ມຈຳນວນວັດຖຸດິບໃນຮ້ານ</p>
                         </div>
                         <div class="w-48">
-                            <input type="text" id="stock-search" oninput="renderStockTable()" placeholder="ຄ้นຫາວັດຖຸດິບ..." class="w-full px-3 py-1.5 rounded-xl border text-xs font-bold">
+                            <input type="text" id="stock-search" oninput="renderStockTable()" placeholder="ຄົ້ນຫາວັດຖຸດິບ..." class="w-full px-3 py-1.5 rounded-xl border text-xs font-bold">
                         </div>
                     </div>
 
@@ -286,7 +286,7 @@
                     <div class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                         <div>
                             <h2 class="font-black text-sm text-slate-800">ລູກໜີ້ຄ້າງຈ່າຍ</h2>
-                            <p class="text-xs text-slate-400 font-semibold">ລາຍຊື່ລູກຄ້າທີ່ຍັງບໍ່ທريມຊຳລະເງິນ</p>
+                            <p class="text-xs text-slate-400 font-semibold">ລາຍຊື່ລູກຄ້າທີ່ຍັງບໍ່ທັນຊຳລະເງິນ</p>
                         </div>
                         <div id="text-total-debt-sum" class="font-black text-rose-600 text-sm">ຍອດໜີ້ລວມ: 0 ₭</div>
                     </div>
@@ -348,7 +348,8 @@
                 <p class="font-black text-xs text-orange-600" id="r-status-tag">ໂຕະ: T-01</p>
                 <p class="text-[10px] text-slate-400 font-semibold" id="r-meta">ວັນທີ: --</p>
             </div>
-            <div class="max-h-44 overflow-y-auto">
+            <!-- 🛑 ແກ້ໄຂ: ເພີ່ມ max-h-60 overflow-y-auto ໃຫ້ສາມາດເລື່ອນເບິ່ງລາຍການທີ່ຫຼາຍໄດ້ໝົດທຸກຢ່າງ -->
+            <div class="max-h-60 overflow-y-auto pr-1">
                 <table class="w-full text-xs">
                     <tbody id="r-items"></tbody>
                 </table>
@@ -362,7 +363,7 @@
                 <div class="flex justify-between font-bold text-rose-600"><span>ຄ້າງຊຳລະ:</span><span id="r-debt">0 ₭</span></div>
                 <div class="flex justify-between font-black text-emerald-600 pt-1 border-t border-slate-100"><span>ເງິນທອນ:</span><span id="r-change">0 ₭</span></div>
 
-                <!-- 🛑 ສ່ວນເພີ່ມຮູບພາບ/QR Code ທ້າຍບິນ -->
+                <!-- ສ່ວນເພີ່ມຮູບພາບ/QR Code ທ້າຍບິນ -->
                 <div class="pt-3 mt-3 border-t border-dashed border-slate-200 text-center space-y-2">
                     <div class="w-20 h-20 mx-auto rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50 flex items-center justify-center">
                         <img src="https://i.ibb.co/ycwXcb9r/Screenshot-2026-08-08-110239.png" alt="QR Code ຮັບເງິນ" class="w-full h-full object-cover">
@@ -430,7 +431,7 @@
 
         const DEFAULT_MENU = [
             { id: 'm1', name: 'ເຂົ້າຜັດໝູ', price: 35000, category: 'c1' },
-            { id: 'm2', name: 'ຕ້ມຍຳກຸ້ງ', price: 60000, category: 'c2' },
+            { id: 'm2', name: 'ຕົ້ມຍຳກຸ້ງ', price: 60000, category: 'c2' },
             { id: 'm3', name: 'ຕຳໝາກຫຸ່ງປູປາລາ', price: 25000, category: 'c3' },
             { id: 'm4', name: 'ລາບໝູ', price: 45000, category: 'c1' },
             { id: 'm5', name: 'ປາຊິ້ນທອດ', price: 50000, category: 'c1' },
@@ -455,8 +456,7 @@
             salesHistory: JSON.parse(localStorage.getItem('vx_salesHistory')) || [],
             debts: JSON.parse(localStorage.getItem('vx_debts')) || [],
             currentTable: null,
-            activeCategory: 'all',
-            currentReceipt: null
+            activeCategory: 'all'
         };
 
         function saveState() {
@@ -467,24 +467,6 @@
             localStorage.setItem('vx_orders', JSON.stringify(state.orders));
             localStorage.setItem('vx_salesHistory', JSON.stringify(state.salesHistory));
             localStorage.setItem('vx_debts', JSON.stringify(state.debts));
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const reportDateInput = document.getElementById('report-date-select');
-            if (reportDateInput) reportDateInput.value = todayStr;
-            initApp();
-        });
-
-        function initApp() {
-            renderTables();
-            renderCategories();
-            renderMenu();
-            renderStockTable();
-            renderAdminLists();
-            updateFrontRevenue();
-            loadSalesReport();
-            renderDebtsList();
         }
 
         function handleLogin(e) {
@@ -506,787 +488,662 @@
         }
 
         function switchView(viewName) {
-            const views = ['pos', 'stock', 'reports', 'debts', 'admin'];
-            views.forEach(v => {
-                const sec = document.getElementById(`view-${v}`);
-                if (sec) sec.classList.add('hidden');
-            });
-            const activeSec = document.getElementById(`view-${viewName}`);
-            if (activeSec) activeSec.classList.remove('hidden');
-
-            views.forEach(v => {
+            ['pos', 'stock', 'reports', 'debts', 'admin'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
                 const btn = document.getElementById(`nav-${v}`);
                 if (btn) {
-                    if (v === viewName) {
-                        btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-md shadow-orange-500/20 transition-all flex items-center space-x-1.5";
-                    } else {
-                        btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5";
-                    }
+                    btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition-all flex items-center space-x-1.5";
                 }
             });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${viewName}`);
+            if (activeBtn) {
+                activeBtn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-md shadow-orange-500/20 transition-all flex items-center space-x-1.5";
+            }
 
-            if (viewName === 'reports') loadSalesReport();
-            if (viewName === 'debts') renderDebtsList();
-            if (viewName === 'stock') renderStockTable();
+            if (viewName === 'stock') { renderStockTable(); loadAdminSelects(); }
+            if (viewName === 'reports') { loadSalesReport(); }
+            if (viewName === 'debts') { renderDebtsList(); }
+            if (viewName === 'admin') { renderAdminData(); }
+        }
+
+        function initApp() {
+            renderTables();
+            renderCategories();
+            renderMenu();
+            updateFrontRevenue();
+            if (state.tables.length > 0 && !state.currentTable) {
+                selectTable(state.tables[0].id);
+            }
         }
 
         function renderTables() {
             const grid = document.getElementById('grid-tables');
-            if (!grid) return;
             grid.innerHTML = '';
             state.tables.forEach(t => {
-                const hasOrder = state.orders[t.name] && state.orders[t.name].length > 0;
-                const isSelected = state.currentTable === t.name;
-
-                let bgClass = "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100";
-                if (hasOrder) bgClass = "bg-amber-50 border-amber-300 text-amber-800";
-                if (isSelected) bgClass = "bg-orange-500 border-orange-600 text-white shadow-md shadow-orange-500/30 ring-2 ring-orange-400";
+                const hasOrder = state.orders[t.id] && state.orders[t.id].length > 0;
+                const isSelected = state.currentTable === t.id;
+                
+                let bgClass = "bg-white text-slate-700 border-slate-200 hover:border-orange-500";
+                if (hasOrder) bgClass = "bg-orange-50 text-orange-600 border-orange-200";
+                if (isSelected) bgClass = "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30";
 
                 const btn = document.createElement('button');
-                btn.className = `p-2.5 rounded-2xl border text-center transition-all flex flex-col items-center justify-center space-y-1 ${bgClass}`;
-                btn.onclick = () => selectTable(t.name);
-                btn.innerHTML = `
-                    <i class="fa-solid fa-chair text-xs"></i>
-                    <span class="font-black text-[11px]">${t.name}</span>
-                    <span class="text-[9px] font-bold ${isSelected ? 'text-white/80' : (hasOrder ? 'text-amber-600' : 'text-slate-400')}">
-                        ${hasOrder ? 'ມີອໍເດີ' : 'ວ່າງ'}
-                    </span>
-                `;
+                btn.className = `p-2 rounded-xl border text-xs font-black transition-all flex flex-col items-center justify-center space-y-1 ${bgClass}`;
+                btn.innerHTML = `<i class="fa-solid fa-chair text-xs"></i><span>${t.name}</span>`;
+                btn.onclick = () => selectTable(t.id);
                 grid.appendChild(btn);
             });
         }
 
-        function selectTable(tableName) {
-            state.currentTable = tableName;
-            document.getElementById('text-current-table').innerText = `ໂຕະອາຫານ: ${tableName}`;
+        function selectTable(tableId) {
+            state.currentTable = tableId;
+            const tObj = state.tables.find(x => x.id === tableId);
+            document.getElementById('text-current-table').innerText = `ໂຕະ: ${tObj ? tObj.name : tableId}`;
             document.getElementById('btn-table-action').disabled = false;
             renderTables();
-            renderCartRows();
-            liveCalcChange();
+            renderCart();
         }
 
         function renderCategories() {
             const container = document.getElementById('category-pills');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const allBtn = document.createElement('button');
-            allBtn.className = `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${state.activeCategory === 'all' ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
-            allBtn.innerText = 'ທັງໝົດ';
-            allBtn.onclick = () => { state.activeCategory = 'all'; renderMenu(); };
-            container.appendChild(allBtn);
-
+            container.innerHTML = `
+                <button onclick="filterCategory('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${state.activeCategory === 'all' ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">ທັງໝົດ</button>
+            `;
             state.categories.forEach(c => {
+                const isActive = state.activeCategory === c.id;
                 const btn = document.createElement('button');
-                btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${state.activeCategory === c.id ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+                btn.className = `px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${isActive ? 'bg-orange-500 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
                 btn.innerText = c.name;
-                btn.onclick = () => { state.activeCategory = c.id; renderMenu(); };
+                btn.onclick = () => filterCategory(c.id);
                 container.appendChild(btn);
             });
         }
 
-        function renderMenu() {
+        function filterCategory(catId) {
+            state.activeCategory = catId;
             renderCategories();
+            renderMenu();
+        }
+
+        function renderMenu() {
             const grid = document.getElementById('grid-menu');
-            if (!grid) return;
+            const keyword = document.getElementById('input-search-menu').value.toLowerCase();
             grid.innerHTML = '';
 
-            const searchTerm = document.getElementById('input-search-menu')?.value.toLowerCase() || '';
             const filtered = state.menu.filter(m => {
                 const matchCat = state.activeCategory === 'all' || m.category === state.activeCategory;
-                const matchSearch = m.name.toLowerCase().includes(searchTerm);
-                return matchCat && matchSearch;
+                const matchKey = m.name.toLowerCase().includes(keyword);
+                return matchCat && matchKey;
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400 font-semibold">ບໍ່ພົບລາຍການເມນູ</div>`;
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400 font-bold">ບໍ່ພົບລາຍການເມນູ</div>`;
                 return;
             }
 
             filtered.forEach(m => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-50 hover:bg-orange-50/50 border border-slate-200 hover:border-orange-300 rounded-2xl p-3 flex flex-col justify-between space-y-2 cursor-pointer transition-all";
+                card.className = "bg-white p-3 rounded-2xl border border-slate-200 hover:border-orange-500 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-2";
                 card.onclick = () => addToCart(m.id);
                 card.innerHTML = `
-                    <div class="font-bold text-slate-800 text-xs line-clamp-2">${m.name}</div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-black text-orange-600 text-xs">${m.price.toLocaleString()} ₭</span>
-                        <div class="w-6 h-6 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-plus"></i></div>
+                    <div class="font-bold text-xs text-slate-800 line-clamp-2">${m.name}</div>
+                    <div class="flex justify-between items-center text-xs font-black">
+                        <span class="text-orange-600">${m.price.toLocaleString()} ₭</span>
+                        <div class="w-7 h-7 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-plus text-[10px]"></i></div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function filterMenu() { renderMenu(); }
+        function filterMenu() {
+            renderMenu();
+        }
 
         function addToCart(menuId) {
             if (!state.currentTable) {
-                alert('ກະລຸນາເລືອກໂຕະອາຫານກ่อนເພີ່ມລາຍການ!');
+                alert('ກະລຸນາເລືອກໂຕະອາຫານກ່ອນ!');
                 return;
             }
-            const menuItem = state.menu.find(m => m.id === menuId);
-            if (!menuItem) return;
-
-            if (!state.orders[state.currentTable]) state.orders[state.currentTable] = [];
+            if (!state.orders[state.currentTable]) {
+                state.orders[state.currentTable] = [];
+            }
             const cart = state.orders[state.currentTable];
-            const existing = cart.find(item => item.id === menuId);
+            const item = state.menu.find(m => m.id === menuId);
+            const existing = cart.find(x => x.id === menuId);
+
             if (existing) {
                 existing.qty += 1;
             } else {
-                cart.push({ id: menuItem.id, name: menuItem.name, price: menuItem.price, qty: 1 });
+                cart.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+            }
+            saveState();
+            renderTables();
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cart-table-rows');
+            tbody.innerHTML = '';
+            const cart = (state.currentTable && state.orders[state.currentTable]) ? state.orders[state.currentTable] : [];
+
+            if (cart.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs text-slate-400 font-semibold">ຍັງບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້</td></tr>`;
+                liveCalcChange();
+                return;
             }
 
-            saveState();
-            renderCartRows();
-            renderTables();
+            cart.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="py-2 font-bold text-slate-800">${item.name}</td>
+                    <td class="py-2 text-center">
+                        <div class="inline-flex items-center space-x-1 bg-slate-100 rounded-lg p-0.5">
+                            <button onclick="updateCartQty(${index}, -1)" class="w-5 h-5 bg-white rounded flex items-center justify-center text-[10px] font-bold shadow-sm">-</button>
+                            <span class="w-6 text-center font-bold text-xs">${item.qty}</span>
+                            <button onclick="updateCartQty(${index}, 1)" class="w-5 h-5 bg-white rounded flex items-center justify-center text-[10px] font-bold shadow-sm">+</button>
+                        </div>
+                    </td>
+                    <td class="py-2 text-right font-bold text-slate-600">${(item.price * item.qty).toLocaleString()} ₭</td>
+                    <td class="py-2 text-right">
+                        <button onclick="removeCartItem(${index})" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-xmark text-xs"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
             liveCalcChange();
         }
 
-        function updateCartQty(menuId, change) {
-            if (!state.currentTable) return;
+        function updateCartQty(index, delta) {
             const cart = state.orders[state.currentTable];
-            if (!cart) return;
-
-            const idx = cart.findIndex(i => i.id === menuId);
-            if (idx > -1) {
-                cart[idx].qty += change;
-                if (cart[idx].qty <= 0) cart.splice(idx, 1);
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) {
+                cart.splice(index, 1);
             }
-            if (cart.length === 0) delete state.orders[state.currentTable];
-
             saveState();
-            renderCartRows();
             renderTables();
-            liveCalcChange();
+            renderCart();
+        }
+
+        function removeCartItem(index) {
+            const cart = state.orders[state.currentTable];
+            cart.splice(index, 1);
+            saveState();
+            renderTables();
+            renderCart();
         }
 
         function clearCurrentBasket() {
             if (!state.currentTable) return;
-            if (confirm(`ຕ້ອງການລ້າງລາຍການທັງໝົດໃນໂຕະ ${state.currentTable} ຫຼືບໍ່?`)) {
-                delete state.orders[state.currentTable];
-                saveState();
-                renderCartRows();
-                renderTables();
-                liveCalcChange();
-            }
-        }
-
-        function renderCartRows() {
-            const tbody = document.getElementById('cart-table-rows');
-            if (!tbody) return;
-            tbody.innerHTML = '';
-
-            if (!state.currentTable || !state.orders[state.currentTable] || state.orders[state.currentTable].length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs text-slate-400 font-semibold">ຍັງບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້</td></tr>`;
-                document.getElementById('text-subtotal-price').innerText = '0 ₭';
-                document.getElementById('text-total-price').innerText = '0 ₭';
-                return;
-            }
-
-            const cart = state.orders[state.currentTable];
-            let subtotal = 0;
-
-            cart.forEach(item => {
-                const itemTotal = item.price * item.qty;
-                subtotal += itemTotal;
-
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100";
-                tr.innerHTML = `
-                    <td class="py-2.5 font-bold text-slate-700">${item.name}</td>
-                    <td class="py-2.5 text-center">
-                        <div class="inline-flex items-center space-x-1 bg-slate-100 rounded-lg p-0.5">
-                            <button onclick="updateCartQty('${item.id}', -1)" class="w-5 h-5 bg-white rounded-md font-bold shadow-sm hover:bg-slate-200">-</button>
-                            <span class="w-6 text-center font-black">${item.qty}</span>
-                            <button onclick="updateCartQty('${item.id}', 1)" class="w-5 h-5 bg-white rounded-md font-bold shadow-sm hover:bg-slate-200">+</button>
-                        </div>
-                    </td>
-                    <td class="py-2.5 text-right font-bold text-slate-600">${itemTotal.toLocaleString()} ₭</td>
-                    <td class="py-2.5 text-right">
-                        <button onclick="updateCartQty('${item.id}', -999)" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('text-subtotal-price').innerText = `${subtotal.toLocaleString()} ₭`;
-            liveCalcChange();
-        }
-
-        function calculateTotals() {
-            if (!state.currentTable || !state.orders[state.currentTable]) return { subtotal: 0, discount: 0, total: 0 };
-            const cart = state.orders[state.currentTable];
-            let subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-
-            const discountVal = parseFloat(document.getElementById('input-discount')?.value) || 0;
-            const discountType = document.getElementById('select-discount-type')?.value || 'amount';
-
-            let discountAmount = discountType === 'percent' ? (subtotal * discountVal) / 100 : discountVal;
-            let total = subtotal - discountAmount;
-            if (total < 0) total = 0;
-
-            return { subtotal, discount: discountAmount, total };
+            state.orders[state.currentTable] = [];
+            saveState();
+            renderTables();
+            renderCart();
         }
 
         function liveCalcChange() {
-            const { subtotal, discount, total } = calculateTotals();
+            const cart = (state.currentTable && state.orders[state.currentTable]) ? state.orders[state.currentTable] : [];
+            let subtotal = cart.reduce((acc, cur) => acc + (cur.price * cur.qty), 0);
+            
+            const discVal = parseFloat(document.getElementById('input-discount').value) || 0;
+            const discType = document.getElementById('select-discount-type').value;
+            
+            let discount = 0;
+            if (discType === 'percent') {
+                discount = (subtotal * discVal) / 100;
+            } else {
+                discount = discVal;
+            }
+            
+            let total = Math.max(0, subtotal - discount);
+
+            const cash = parseFloat(document.getElementById('input-cash').value) || 0;
+            const transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
+            const debt = parseFloat(document.getElementById('input-debt').value) || 0;
+
+            const paidTotal = cash + transfer + debt;
+            const change = Math.max(0, paidTotal - total);
+
             document.getElementById('text-subtotal-price').innerText = `${subtotal.toLocaleString()} ₭`;
             document.getElementById('text-total-price').innerText = `${total.toLocaleString()} ₭`;
-
-            const cash = parseFloat(document.getElementById('input-cash')?.value) || 0;
-            const transfer = parseFloat(document.getElementById('input-transfer')?.value) || 0;
-            const debt = parseFloat(document.getElementById('input-debt')?.value) || 0;
-
-            const paidSum = cash + transfer + debt;
-            const change = paidSum - total;
-
-            const changeEl = document.getElementById('text-change-price');
-            if (changeEl) changeEl.innerText = `${change >= 0 ? change.toLocaleString() : '0'} ₭`;
+            document.getElementById('text-change-price').innerText = `${change.toLocaleString()} ₭`;
         }
 
         function fastSaveOrderToTable() {
-            if (!state.currentTable || !state.orders[state.currentTable]) {
-                alert('ບໍ່ມີລາຍການໃນໂຕະນີ້!');
-                return;
-            }
+            if (!state.currentTable) return;
             saveState();
-            renderTables();
-            alert(`ບັນທຶກອໍເດີໂຕະ ${state.currentTable} ຮຽບຮ້ອຍແລ້ວ!`);
-        }
-
-        function printPreBill() {
-            if (!state.currentTable || !state.orders[state.currentTable]) {
-                alert('ບໍ່ມີລາຍການໃນໂຕະນີ້ເພື່ອພິມໃບແຈ້ງຍອດ!');
-                return;
-            }
-            openReceiptModal(true);
+            alert('ບັນທຶກຂໍ້ມູນໂຕະຮຽບຮ້ອຍ!');
         }
 
         function fastProcessPayment() {
-            if (!state.currentTable || !state.orders[state.currentTable]) {
-                alert('ບໍ່ມີລາຍການໃນໂຕະນີ້!');
+            if (!state.currentTable) return;
+            const cart = state.orders[state.currentTable];
+            if (!cart || cart.length === 0) {
+                alert('ບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້!');
                 return;
             }
 
-            const { subtotal, discount, total } = calculateTotals();
-            const cash = parseFloat(document.getElementById('input-cash')?.value) || 0;
-            const transfer = parseFloat(document.getElementById('input-transfer')?.value) || 0;
-            const debt = parseFloat(document.getElementById('input-debt')?.value) || 0;
+            let subtotal = cart.reduce((acc, cur) => acc + (cur.price * cur.qty), 0);
+            const discVal = parseFloat(document.getElementById('input-discount').value) || 0;
+            const discType = document.getElementById('select-discount-type').value;
+            let discount = discType === 'percent' ? (subtotal * discVal) / 100 : discVal;
+            let total = Math.max(0, subtotal - discount);
 
-            const paidSum = cash + transfer + debt;
-            if (paidSum < total) {
-                alert('ຍອດຊຳລະເງິນໜ້ອຍກว่าຍອດລວມທັງໝົດ!');
+            const cash = parseFloat(document.getElementById('input-cash').value) || 0;
+            const transfer = parseFloat(document.getElementById('input-transfer').value) || 0;
+            const debt = parseFloat(document.getElementById('input-debt').value) || 0;
+
+            const paidTotal = cash + transfer + debt;
+            if (paidTotal < total) {
+                alert('ຍອດເງິນທີ່ຮັບ/ຄ້າງຈ່າຍ ຍັງໜ້ອຍກວ່າຍອດລວມ!');
                 return;
             }
 
-            const receiptData = {
-                id: 'INV-' + Math.floor(100000 + Math.random() * 900000),
-                date: new Date().toISOString(),
-                table: state.currentTable,
-                items: [...state.orders[state.currentTable]],
-                subtotal, discount, total, cash, transfer, debt,
-                change: (cash + transfer) > total ? (cash + transfer - total) : 0
+            const change = paidTotal - total;
+            const tObj = state.tables.find(x => x.id === state.currentTable);
+            const tableName = tObj ? tObj.name : state.currentTable;
+
+            const receipt = {
+                id: 'REC-' + Date.now().toString().slice(-6),
+                tableName: tableName,
+                date: new Date().toLocaleString(),
+                items: [...cart],
+                subtotal, discount, total, cash, transfer, debt, change
             };
 
-            state.salesHistory.push(receiptData);
+            state.salesHistory.push(receipt);
 
             if (debt > 0) {
                 state.debts.push({
-                    id: 'DEBT-' + Math.floor(10000 + Math.random() * 90000),
-                    date: new Date().toISOString(),
-                    table: state.currentTable,
-                    invoiceId: receiptData.id,
-                    amount: debt,
-                    paid: false
+                    id: receipt.id,
+                    tableName: tableName,
+                    date: receipt.date,
+                    amount: debt
                 });
             }
 
-            receiptData.items.forEach(item => {
-                state.stock.forEach(st => {
-                    if (st.linkedMenu === item.id) {
-                        st.qty -= item.qty;
-                        if (st.qty < 0) st.qty = 0;
-                    }
-                });
-            });
-
-            delete state.orders[state.currentTable];
-            saveState();
-
-            document.getElementById('input-cash').value = '';
-            document.getElementById('input-transfer').value = '';
-            document.getElementById('input-debt').value = '';
-            document.getElementById('input-discount').value = '0';
-
-            renderTables();
-            renderCartRows();
-            updateFrontRevenue();
-            renderStockTable();
-
-            state.currentReceipt = receiptData;
-            openReceiptModal(false);
-        }
-
-        function openReceiptModal(isPreBill) {
-            const modal = document.getElementById('receiptModal');
-            modal.classList.remove('hidden');
-
-            const title = document.getElementById('r-title');
-            const statusTag = document.getElementById('r-status-tag');
-            const meta = document.getElementById('r-meta');
-            const tbody = document.getElementById('r-items');
-
-            let cartItems = [];
-            let subtotal = 0, discount = 0, total = 0, cash = 0, transfer = 0, debt = 0, change = 0;
-
-            if (isPreBill) {
-                title.innerText = 'ໃບແຈ້ງຍອດ (Pre-Bill)';
-                statusTag.innerText = `ໂຕະ: ${state.currentTable}`;
-                meta.innerText = `ວັນທີ: ${new Date().toLocaleString()}`;
-                cartItems = state.orders[state.currentTable] || [];
-                const res = calculateTotals();
-                subtotal = res.subtotal;
-                discount = res.discount;
-                total = res.total;
-            } else {
-                title.innerText = 'ໃບເສັດຮັບເງິນ (Receipt)';
-                const r = state.currentReceipt;
-                statusTag.innerText = `ເລກບິນ: ${r.id} | ໂຕະ: ${r.table}`;
-                meta.innerText = `ວັນທີ: ${new Date(r.date).toLocaleString()}`;
-                cartItems = r.items;
-                subtotal = r.subtotal;
-                discount = r.discount;
-                total = r.total;
-                cash = r.cash;
-                transfer = r.transfer;
-                debt = r.debt;
-                change = r.change;
-            }
-
-            tbody.innerHTML = '';
-            cartItems.forEach(i => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100";
-                tr.innerHTML = `
-                    <td class="py-1.5 font-bold text-slate-700">${i.name} x${i.qty}</td>
-                    <td class="py-1.5 text-right font-bold text-slate-600">${(i.price * i.qty).toLocaleString()} ₭</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('r-subtotal').innerText = `${subtotal.toLocaleString()} ₭`;
-            document.getElementById('r-discount').innerText = `${discount.toLocaleString()} ₭`;
-            document.getElementById('r-total').innerText = `${total.toLocaleString()} ₭`;
-            document.getElementById('r-cash').innerText = `${cash.toLocaleString()} ₭`;
-            document.getElementById('r-transfer').innerText = `${transfer.toLocaleString()} ₭`;
-            document.getElementById('r-debt').innerText = `${debt.toLocaleString()} ₭`;
-            document.getElementById('r-change').innerText = `${change.toLocaleString()} ₭`;
-        }
-
-        function closeReceiptModal() { document.getElementById('receiptModal').classList.add('hidden'); }
-
-        function openBackupModal() { document.getElementById('backupModal').classList.remove('hidden'); }
-        function closeBackupModal() { document.getElementById('backupModal').classList.add('hidden'); }
-
-        function exportJSONData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(localStorage));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `viengxai_pos_backup_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-        }
-
-        function importJSONData() {
-            const fileInput = document.getElementById('import-file-input');
-            if (fileInput.files.length === 0) {
-                alert('ກະລຸນາເລືອກໄຟລ໌ JSON ກ່ອນ!');
-                return;
-            }
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    Object.keys(imported).forEach(key => { localStorage.setItem(key, imported[key]); });
-                    alert('ນຳເຂົ້າຂໍ້ມູນສຳເລັດແລ້ວ!');
-                    location.reload();
-                } catch (err) { alert('ໄຟລ໌ JSON ບໍ່ຖືກຕ້ອງ!'); }
-            };
-            reader.readAsText(file);
-        }
-
-        function openTableActionModal() {
-            if (!state.currentTable || !state.orders[state.currentTable]) return;
-            document.getElementById('ta-source-table').innerText = state.currentTable;
-
-            const targetSelect = document.getElementById('ta-target-table');
-            targetSelect.innerHTML = '';
-            state.tables.forEach(t => {
-                if (t.name !== state.currentTable) {
-                    const opt = document.createElement('option');
-                    opt.value = t.name;
-                    opt.innerText = `ໂຕະ ${t.name}`;
-                    targetSelect.appendChild(opt);
+            // Deduct stock if linked
+            cart.forEach(ci => {
+                const st = state.stock.find(s => s.linkedMenu === ci.id);
+                if (st) {
+                    st.qty = Math.max(0, st.qty - ci.qty);
                 }
             });
 
-            document.getElementById('tableActionModal').classList.remove('hidden');
-        }
-        function closeTableActionModal() { document.getElementById('tableActionModal').classList.add('hidden'); }
-
-        function executeMoveTable() {
-            const src = state.currentTable;
-            const target = document.getElementById('ta-target-table').value;
-            if (!target) return;
-
-            state.orders[target] = state.orders[src];
-            delete state.orders[src];
+            // Clear table order
+            state.orders[state.currentTable] = [];
             saveState();
-            closeTableActionModal();
-            selectTable(target);
-            alert(`ຍ້າຍອໍເດີສຳເລັດ!`);
+
+            // Reset inputs
+            document.getElementById('input-discount').value = 0;
+            document.getElementById('input-cash').value = '';
+            document.getElementById('input-transfer').value = '';
+            document.getElementById('input-debt').value = '';
+
+            renderTables();
+            renderCart();
+            updateFrontRevenue();
+            openReceiptModalData(receipt);
         }
 
-        function executeMergeTable() {
-            const src = state.currentTable;
-            const target = document.getElementById('ta-target-table').value;
-            if (!target) return;
+        function printPreBill() {
+            if (!state.currentTable) return;
+            const cart = state.orders[state.currentTable];
+            if (!cart || cart.length === 0) {
+                alert('ບໍ່ມີລາຍການອາຫານໃນໂຕະນີ້!');
+                return;
+            }
+            let subtotal = cart.reduce((acc, cur) => acc + (cur.price * cur.qty), 0);
+            let total = subtotal;
+            const tObj = state.tables.find(x => x.id === state.currentTable);
 
-            if (!state.orders[target]) state.orders[target] = [];
+            const receipt = {
+                id: 'PRE-' + Date.now().toString().slice(-6),
+                tableName: tObj ? tObj.name : state.currentTable,
+                date: new Date().toLocaleString(),
+                items: [...cart],
+                subtotal, discount: 0, total, cash: 0, transfer: 0, debt: 0, change: 0
+            };
+            openReceiptModalData(receipt);
+        }
 
-            state.orders[src].forEach(item => {
-                const existing = state.orders[target].find(i => i.id === item.id);
-                if (existing) existing.qty += item.qty;
-                else state.orders[target].push({ ...item });
+        function openReceiptModalData(rc) {
+            document.getElementById('r-title').innerText = rc.id.startsWith('PRE') ? 'ໃບແຈ້ງຍອດ (Pre-Bill)' : 'ໃບເສັດຮັບເງິນ';
+            document.getElementById('r-status-tag').innerText = `ໂຕະ: ${rc.tableName}`;
+            document.getElementById('r-meta').innerText = `ວັນທີ: ${rc.date}`;
+            
+            const tbody = document.getElementById('r-items');
+            tbody.innerHTML = '';
+            rc.items.forEach(i => {
+                tbody.innerHTML += `<tr><td class="py-1 font-bold">${i.name} (x${i.qty})</td><td class="py-1 text-right font-bold">${(i.price * i.qty).toLocaleString()} ₭</td></tr>`;
             });
 
-            delete state.orders[src];
-            saveState();
-            closeTableActionModal();
-            selectTable(target);
-            alert(`ລວມອໍເດີສຳເລັດ!`);
+            document.getElementById('r-subtotal').innerText = `${rc.subtotal.toLocaleString()} ₭`;
+            document.getElementById('r-discount').innerText = `${rc.discount.toLocaleString()} ₭`;
+            document.getElementById('r-total').innerText = `${rc.total.toLocaleString()} ₭`;
+            document.getElementById('r-cash').innerText = `${rc.cash.toLocaleString()} ₭`;
+            document.getElementById('r-transfer').innerText = `${rc.transfer.toLocaleString()} ₭`;
+            document.getElementById('r-debt').innerText = `${rc.debt.toLocaleString()} ₭`;
+            document.getElementById('r-change').innerText = `${rc.change.toLocaleString()} ₭`;
+
+            document.getElementById('receiptModal').classList.remove('hidden');
         }
 
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').classList.add('hidden');
+        }
+
+        function updateFrontRevenue() {
+            const todaySum = state.salesHistory.reduce((acc, cur) => {
+                return acc + cur.total;
+            }, 0);
+            document.getElementById('front-revenue-tag').innerText = `ຍອດມື້ນີ້: ${todaySum.toLocaleString()} ₭`;
+        }
+
+        // Stock functions
         function renderStockTable() {
             const tbody = document.getElementById('stock-table-rows');
-            if (!tbody) return;
+            const keyword = document.getElementById('stock-search').value.toLowerCase();
             tbody.innerHTML = '';
 
-            const searchTerm = document.getElementById('stock-search')?.value.toLowerCase() || '';
-            const filtered = state.stock.filter(s => s.name.toLowerCase().includes(searchTerm));
-
+            const filtered = state.stock.filter(s => s.name.toLowerCase().includes(keyword));
             filtered.forEach(s => {
-                const linkedMenuObj = state.menu.find(m => m.id === s.linkedMenu);
-                const isLow = s.qty <= 5;
-
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-slate-100 hover:bg-slate-50";
-                tr.innerHTML = `
-                    <td class="p-2.5 font-bold text-slate-800">${s.name} <br/><span class="text-[10px] text-slate-400">ເມນູ: ${linkedMenuObj ? linkedMenuObj.name : 'ບໍ່ມີ'}</span></td>
-                    <td class="p-2.5 text-center font-black ${isLow ? 'text-rose-600' : 'text-slate-700'}">${s.qty}</td>
-                    <td class="p-2.5 text-center font-semibold text-slate-500">${s.unit}</td>
-                    <td class="p-2.5 text-center">
-                        <span class="px-2 py-1 rounded-lg text-[10px] font-bold ${isLow ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}">
-                            ${isLow ? 'ໃກ້ໝົດ' : 'ປົກກະຕິ'}
-                        </span>
-                    </td>
-                    <td class="p-2.5 text-right space-x-1">
-                        <button onclick="adjustStockQty('${s.id}', 5)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-[10px] font-bold">+5</button>
-                        <button onclick="deleteStockItem('${s.id}')" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
+                let badge = '<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded font-bold">ປົກກະຕິ</span>';
+                if (s.qty <= 3) {
+                    badge = '<span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded font-bold">ໃກ້ໝົດ</span>';
+                }
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100">
+                        <td class="p-3 font-bold text-slate-800">${s.name}</td>
+                        <td class="p-3 text-center font-bold">${s.qty}</td>
+                        <td class="p-3 text-center text-slate-500">${s.unit}</td>
+                        <td class="p-3 text-center">${badge}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="deleteStockItem('${s.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
         }
 
         function addStockItem() {
-            const name = document.getElementById('st-name').value.trim();
+            const name = document.getElementById('st-name').value;
             const qty = parseFloat(document.getElementById('st-qty').value) || 0;
-            const unit = document.getElementById('st-unit').value.trim();
+            const unit = document.getElementById('st-unit').value;
             const linkedMenu = document.getElementById('st-linked-menu').value;
 
-            if (!name) { alert('ກະລຸນາໃສ່ຊື່ວັດຖຸດິບ!'); return; }
+            if (!name) return alert('ກະລຸນາໃສ່ຊື່ວັດຖຸດິບ');
 
-            state.stock.push({ id: 'st-' + Date.now(), name, qty, unit: unit || 'ໜ່ວຍ', linkedMenu });
+            state.stock.push({ id: 'st-' + Date.now(), name, qty, unit, linkedMenu });
             saveState();
-            renderStockTable();
-
             document.getElementById('st-name').value = '';
             document.getElementById('st-qty').value = '';
             document.getElementById('st-unit').value = '';
-        }
-
-        function adjustStockQty(id, amount) {
-            const item = state.stock.find(s => s.id === id);
-            if (item) {
-                item.qty += amount;
-                saveState();
-                renderStockTable();
-            }
+            renderStockTable();
         }
 
         function deleteStockItem(id) {
-            if (confirm('ຕ້ອງການລຶບວັດຖຸດິບນີ້ ຫຼືບໍ່?')) {
-                state.stock = state.stock.filter(s => s.id !== id);
-                saveState();
-                renderStockTable();
-            }
+            state.stock = state.stock.filter(s => s.id !== id);
+            saveState();
+            renderStockTable();
         }
 
-        function loadSalesReport() {
-            const dateVal = document.getElementById('report-date-select')?.value;
-            if (!dateVal) return;
+        function loadAdminSelects() {
+            const sel = document.getElementById('st-linked-menu');
+            sel.innerHTML = '<option value="">-- ບໍ່ເຊື່ອມໂຍງ --</option>';
+            state.menu.forEach(m => {
+                sel.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+            });
+        }
 
-            const dayInvoices = state.salesHistory.filter(inv => inv.date.startsWith(dateVal));
+        // Reports
+        function loadSalesReport() {
             let sum = 0, cash = 0, transfer = 0, debt = 0;
-            dayInvoices.forEach(inv => {
-                sum += inv.total;
-                cash += inv.cash;
-                transfer += inv.transfer;
-                debt += inv.debt;
+            const rows = document.getElementById('sales-history-rows');
+            rows.innerHTML = '';
+
+            state.salesHistory.forEach(sh => {
+                sum += sh.total;
+                cash += sh.cash;
+                transfer += sh.transfer;
+                debt += sh.debt;
+
+                rows.innerHTML += `
+                    <div class="flex justify-between items-center p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                        <div>
+                            <span class="font-black text-slate-800">${sh.id}</span> - <span class="font-bold text-orange-600">${sh.tableName}</span>
+                            <div class="text-[10px] text-slate-400">${sh.date}</div>
+                        </div>
+                        <div class="font-black text-slate-800">${sh.total.toLocaleString()} ₭</div>
+                    </div>
+                `;
             });
 
             document.getElementById('text-revenue-sum').innerText = `${sum.toLocaleString()} ₭`;
             document.getElementById('text-revenue-cash').innerText = `${cash.toLocaleString()} ₭`;
             document.getElementById('text-revenue-transfer').innerText = `${transfer.toLocaleString()} ₭`;
             document.getElementById('text-revenue-debt').innerText = `${debt.toLocaleString()} ₭`;
-
-            const rowsContainer = document.getElementById('sales-history-rows');
-            if (!rowsContainer) return;
-            rowsContainer.innerHTML = '';
-
-            if (dayInvoices.length === 0) {
-                rowsContainer.innerHTML = `<div class="py-4 text-center text-xs text-slate-400 font-semibold">ບໍ່ມີປະຫວັດການຂາຍໃນວັນທີນີ້</div>`;
-                return;
-            }
-
-            dayInvoices.slice().reverse().forEach(inv => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-50 border border-slate-200 p-3 rounded-2xl flex justify-between items-center text-xs";
-                div.innerHTML = `
-                    <div>
-                        <div class="font-black text-slate-800">${inv.id} (ໂຕະ: ${inv.table})</div>
-                        <div class="text-[10px] text-slate-400 font-semibold">${new Date(inv.date).toLocaleTimeString()} | ລາຍການ: ${inv.items.length} ຢ່າງ</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-black text-orange-600">${inv.total.toLocaleString()} ₭</div>
-                        <button onclick='showInvoiceDetail(${JSON.stringify(inv)})' class="text-[10px] text-slate-500 hover:text-orange-600 font-bold underline">ເບິ່ງບິນ</button>
-                    </div>
-                `;
-                rowsContainer.appendChild(div);
-            });
-        }
-
-        function showInvoiceDetail(inv) {
-            state.currentReceipt = inv;
-            openReceiptModal(false);
         }
 
         function exportDailyCSV() {
-            const dateVal = document.getElementById('report-date-select')?.value;
-            const dayInvoices = state.salesHistory.filter(inv => inv.date.startsWith(dateVal));
-
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFFID,Table,Subtotal,Discount,Total,Cash,Transfer,Debt,Date\n";
-            dayInvoices.forEach(inv => {
-                csvContent += `${inv.id},${inv.table},${inv.subtotal},${inv.discount},${inv.total},${inv.cash},${inv.transfer},${inv.debt},${inv.date}\n`;
+            let csvContent = "data:text/csv;charset=utf-8,ID,Table,Date,Total\r\n";
+            state.salesHistory.forEach(sh => {
+                csvContent += `${sh.id},${sh.tableName},${sh.date},${sh.total}\r\n`;
             });
-
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `sales_report_${dateVal}.csv`);
+            link.setAttribute("download", "sales_report.csv");
             document.body.appendChild(link);
             link.click();
-            link.remove();
+            document.body.removeChild(link);
         }
 
-        function updateFrontRevenue() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todayInvoices = state.salesHistory.filter(inv => inv.date.startsWith(todayStr));
-            const sum = todayInvoices.reduce((acc, inv) => acc + inv.total, 0);
-            const tag = document.getElementById('front-revenue-tag');
-            if (tag) tag.innerText = `ຍອດມື້ນີ້: ${sum.toLocaleString()} ₭`;
-        }
-
+        // Debts
         function renderDebtsList() {
             const container = document.getElementById('debts-list-rows');
-            if (!container) return;
             container.innerHTML = '';
+            let totalDebtSum = 0;
 
-            const unpaidDebts = state.debts.filter(d => !d.paid);
-            let totalDebtSum = unpaidDebts.reduce((acc, d) => acc + d.amount, 0);
-            document.getElementById('text-total-debt-sum').innerText = `ຍອດໜີ້ລວມ: ${totalDebtSum.toLocaleString()} ₭`;
-
-            if (unpaidDebts.length === 0) {
-                container.innerHTML = `<div class="py-8 text-center text-xs text-slate-400 font-semibold">ບໍ່ມີລູກໜີ້ຄ້າງຊຳລະ</div>`;
+            if (state.debts.length === 0) {
+                container.innerHTML = `<div class="py-6 text-center text-xs text-slate-400 font-bold">ບໍ່ມີລາຍການຄ້າງຈ່າຍ</div>`;
+                document.getElementById('text-total-debt-sum').innerText = `ຍອດໜີ້ລວມ: 0 ₭`;
                 return;
             }
 
-            unpaidDebts.forEach(d => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-50 border border-slate-200 p-3.5 rounded-2xl flex justify-between items-center text-xs";
-                div.innerHTML = `
-                    <div>
-                        <div class="font-black text-slate-800">ລະຫັດໜີ້: ${d.id} (ໂຕະ: ${d.table})</div>
-                        <div class="text-[10px] text-slate-400 font-semibold">ວັນທີ: ${new Date(d.date).toLocaleString()} | ບິນອ້າງອີງ: ${d.invoiceId}</div>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="font-black text-rose-600 text-sm">${d.amount.toLocaleString()} ₭</span>
-                        <button onclick="payDebt('${d.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-xl transition-all shadow-sm">ຊຳລະໜີ້</button>
+            state.debts.forEach(d => {
+                totalDebtSum += d.amount;
+                container.innerHTML += `
+                    <div class="flex justify-between items-center p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs">
+                        <div>
+                            <span class="font-black text-slate-800">${d.id}</span> (ໂຕະ: <span class="text-orange-600">${d.tableName}</span>)
+                            <div class="text-[10px] text-slate-400">${d.date}</div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <span class="font-black text-rose-600">${d.amount.toLocaleString()} ₭</span>
+                            <button onclick="payDebt('${d.id}')" class="bg-emerald-500 text-white px-3 py-1.5 rounded-lg font-bold">ຊຳລະໜີ້</button>
+                        </div>
                     </div>
                 `;
-                container.appendChild(div);
+            });
+            document.getElementById('text-total-debt-sum').innerText = `ຍອດໜີ້ລວມ: ${totalDebtSum.toLocaleString()} ₭`;
+        }
+
+        function payDebt(id) {
+            state.debts = state.debts.filter(d => d.id !== id);
+            saveState();
+            renderDebtsList();
+            alert('ບັນທຶກຊຳລະໜີ້ສຳເລັດ!');
+        }
+
+        // Admin & Table Actions
+        function renderAdminData() {
+            // Categories
+            const catList = document.getElementById('admin-category-list');
+            catList.innerHTML = '';
+            state.categories.forEach(c => {
+                catList.innerHTML += `<div class="flex justify-between text-xs font-bold py-1 border-b border-slate-50"><span>${c.name}</span><button onclick="deleteCat('${c.id}')" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></div>`;
+            });
+
+            // Tables
+            const tabList = document.getElementById('admin-table-list');
+            tabList.innerHTML = '';
+            state.tables.forEach(t => {
+                tabList.innerHTML += `<div class="flex justify-between text-xs font-bold py-1 border-b border-slate-50"><span>${t.name}</span><button onclick="deleteTab('${t.id}')" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></div>`;
+            });
+
+            // Menu
+            const menuList = document.getElementById('admin-menu-list');
+            menuList.innerHTML = '';
+            state.menu.forEach(m => {
+                menuList.innerHTML += `<div class="p-2 border rounded-xl flex justify-between items-center text-xs"><div><div class="font-bold">${m.name}</div><div class="text-orange-600 font-black">${m.price.toLocaleString()} ₭</div></div><button onclick="deleteMenu('${m.id}')" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></div>`;
+            });
+
+            // Select category option
+            const selType = document.getElementById('m-type');
+            selType.innerHTML = '';
+            state.categories.forEach(c => {
+                selType.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
         }
 
-        function payDebt(debtId) {
-            const debtObj = state.debts.find(d => d.id === debtId);
-            if (debtObj) {
-                if (confirm(`ຢືນຢັນການຊຳລະໜີ້ຈຳນວນ ${debtObj.amount.toLocaleString()} ₭ ?`)) {
-                    debtObj.paid = true;
-                    state.salesHistory.push({
-                        id: 'PAY-' + Math.floor(10000 + Math.random() * 90000),
-                        date: new Date().toISOString(),
-                        table: debtObj.table + ' (ຈ່າຍໜີ້)',
-                        items: [], subtotal: 0, discount: 0,
-                        total: debtObj.amount, cash: debtObj.amount,
-                        transfer: 0, debt: 0, change: 0
-                    });
-
-                    saveState();
-                    renderDebtsList();
-                    updateFrontRevenue();
-                    alert('ຊຳລະໜີ້ສຳເລັດແລ້ວ!');
-                }
-            }
-        }
-
-        function renderAdminLists() {
-            const catList = document.getElementById('admin-category-list');
-            if (catList) {
-                catList.innerHTML = '';
-                state.categories.forEach(c => {
-                    const div = document.createElement('div');
-                    div.className = "flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-xl font-bold text-xs";
-                    div.innerHTML = `<span>${c.name}</span><button onclick="deleteCategory('${c.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>`;
-                    catList.appendChild(div);
-                });
-            }
-
-            const tableList = document.getElementById('admin-table-list');
-            if (tableList) {
-                tableList.innerHTML = '';
-                state.tables.forEach(t => {
-                    const div = document.createElement('div');
-                    div.className = "flex justify-between items-center bg-white border border-slate-200 px-3 py-1.5 rounded-xl font-bold text-xs";
-                    div.innerHTML = `<span>ໂຕະ ${t.name}</span><button onclick="deleteTable('${t.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can"></i></button>`;
-                    tableList.appendChild(div);
-                });
-            }
-
-            const mTypeSelect = document.getElementById('m-type');
-            const stMenuSelect = document.getElementById('st-linked-menu');
-
-            if (mTypeSelect) {
-                mTypeSelect.innerHTML = '';
-                state.categories.forEach(c => {
-                    const opt = document.createElement('option');
-                    opt.value = c.id;
-                    opt.innerText = c.name;
-                    mTypeSelect.appendChild(opt);
-                });
-            }
-
-            if (stMenuSelect) {
-                stMenuSelect.innerHTML = '<option value="">-- ເຊື່ອມໂຍງກັບເມນູ --</option>';
-                state.menu.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.id;
-                    opt.innerText = m.name;
-                    stMenuSelect.appendChild(opt);
-                });
-            }
-
-            const menuList = document.getElementById('admin-menu-list');
-            if (menuList) {
-                menuList.innerHTML = '';
-                state.menu.forEach(m => {
-                    const cat = state.categories.find(c => c.id === m.category);
-                    const div = document.createElement('div');
-                    div.className = "bg-white border border-slate-200 p-2.5 rounded-xl flex justify-between items-center font-bold text-xs";
-                    div.innerHTML = `
-                        <div>
-                            <div class="text-slate-800">${m.name}</div>
-                            <div class="text-[10px] text-orange-600">${m.price.toLocaleString()} ₭ <span class="text-slate-400">(${cat ? cat.name : '-'})</span></div>
-                        </div>
-                        <button onclick="deleteMenu('${m.id}')" class="text-rose-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can"></i></button>
-                    `;
-                    menuList.appendChild(div);
-                });
-            }
-        }
-
         function addCategory() {
-            const name = document.getElementById('c-name').value.trim();
+            const name = document.getElementById('c-name').value;
             if (!name) return;
             state.categories.push({ id: 'c-' + Date.now(), name });
             saveState();
             document.getElementById('c-name').value = '';
-            renderAdminLists();
+            renderAdminData();
             renderCategories();
         }
 
-        function deleteCategory(id) {
+        function deleteCat(id) {
             state.categories = state.categories.filter(c => c.id !== id);
             saveState();
-            renderAdminLists();
+            renderAdminData();
             renderCategories();
         }
 
         function addTable() {
-            const name = document.getElementById('t-name').value.trim();
+            const name = document.getElementById('t-name').value;
             if (!name) return;
             state.tables.push({ id: 't-' + Date.now(), name });
             saveState();
             document.getElementById('t-name').value = '';
-            renderAdminLists();
+            renderAdminData();
             renderTables();
         }
 
-        function deleteTable(id) {
+        function deleteTab(id) {
             state.tables = state.tables.filter(t => t.id !== id);
             saveState();
-            renderAdminLists();
+            renderAdminData();
             renderTables();
         }
 
         function addMenu() {
-            const name = document.getElementById('m-name').value.trim();
+            const name = document.getElementById('m-name').value;
             const price = parseFloat(document.getElementById('m-price').value) || 0;
             const category = document.getElementById('m-type').value;
-
-            if (!name || price <= 0) {
-                alert('ກະລຸນາໃສ່ຊື່ເມນູ ແລະ ລາຄາໃຫ້ຖືກຕ້ອງ!');
-                return;
-            }
+            if (!name || price <= 0) return alert('ກະລຸນາໃສ່ຂໍ້ມູນໃຫ້ຖືກຕ້ອງ');
 
             state.menu.push({ id: 'm-' + Date.now(), name, price, category });
             saveState();
-
             document.getElementById('m-name').value = '';
             document.getElementById('m-price').value = '';
-            renderAdminLists();
+            renderAdminData();
             renderMenu();
         }
 
         function deleteMenu(id) {
             state.menu = state.menu.filter(m => m.id !== id);
             saveState();
-            renderAdminLists();
+            renderAdminData();
             renderMenu();
+        }
+
+        // Table Actions Modal
+        function openTableActionModal() {
+            if (!state.currentTable) return;
+            const tObj = state.tables.find(x => x.id === state.currentTable);
+            document.getElementById('ta-source-table').innerText = tObj ? tObj.name : state.currentTable;
+
+            const targetSel = document.getElementById('ta-target-table');
+            targetSel.innerHTML = '';
+            state.tables.forEach(t => {
+                if (t.id !== state.currentTable) {
+                    targetSel.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+                }
+            });
+            document.getElementById('tableActionModal').classList.remove('hidden');
+        }
+
+        function closeTableActionModal() {
+            document.getElementById('tableActionModal').classList.add('hidden');
+        }
+
+        function executeMoveTable() {
+            const targetId = document.getElementById('ta-target-table').value;
+            if (!targetId) return;
+            state.orders[targetId] = state.orders[state.currentTable] || [];
+            state.orders[state.currentTable] = [];
+            saveState();
+            closeTableActionModal();
+            selectTable(targetId);
+        }
+
+        function executeMergeTable() {
+            const targetId = document.getElementById('ta-target-table').value;
+            if (!targetId) return;
+            if (!state.orders[targetId]) state.orders[targetId] = [];
+            
+            const sourceCart = state.orders[state.currentTable] || [];
+            sourceCart.forEach(sc => {
+                const exist = state.orders[targetId].find(x => x.id === sc.id);
+                if (exist) {
+                    exist.qty += sc.qty;
+                } else {
+                    state.orders[targetId].push({...sc});
+                }
+            });
+            state.orders[state.currentTable] = [];
+            saveState();
+            closeTableActionModal();
+            selectTable(targetId);
+        }
+
+        // Backup & Restore
+        function openBackupModal() { document.getElementById('backupModal').classList.remove('hidden'); }
+        function closeBackupModal() { document.getElementById('backupModal').classList.add('hidden'); }
+
+        function exportJSONData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "restaurant_backup.json");
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            dlAnchorElem.remove();
+        }
+
+        function importJSONData() {
+            const fileInput = document.getElementById('import-file-input');
+            if (fileInput.files.length === 0) return alert('ກະລຸນາເລືອກໄຟລ໌ JSON');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    state = parsed;
+                    saveState();
+                    alert('ນຳເຂົ້າຂໍ້ມູນສຳເລັດ!');
+                    location.reload();
+                } catch (err) {
+                    alert('ໄຟລ໌ບໍ່ຖືກຕ້ອງ!');
+                }
+            };
+            reader.readAsText(fileInput.files[0]);
         }
     </script>
 </body>
